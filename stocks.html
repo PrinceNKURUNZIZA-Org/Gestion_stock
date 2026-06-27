@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Stocks</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+</head>
+<body>
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html">
+    <div class="logo-box"><i class="bi bi-boxes"></i></div>
+    <span class="brand-text">Stock<span>Pro</span></span>
+  </a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link " href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link " href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link " href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link " href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link active" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link " href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link " href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link " href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link " href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link " href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link " href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link " href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link " href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link " href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link " href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link " href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Stocks</span>
+    <div class="search-box"><i class="bi bi-search"></i><input id="globalSearch" placeholder="Rechercher..." oninput="doSearch(this.value)"/></div>
+    <div class="tb-btn"><i class="bi bi-bell"></i><span class="notif-dot"></span></div>
+    <a class="tb-btn" href="dashboard.html" title="Dashboard"><i class="bi bi-grid-1x2"></i></a>
+  </div>
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <span class="cur">Stocks</span>
+    </div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-archive-fill"></i> Stocks</h1>
+        <p>Suivi des niveaux de stock par entrepôt</p>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <a class="btn btn-ghost" href="alertes-stock.html"><i class="bi bi-exclamation-triangle"></i> Alertes</a>
+        <button class="btn btn-ghost" onclick="exportCSV()"><i class="bi bi-download"></i> Exporter</button>
+        <button class="btn btn-primary" onclick="openAdd()"><i class="bi bi-plus-lg"></i> Nouveau mouvement</button>
+      </div>
+    </div>
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <div class="search-box" style="max-width:260px;"><i class="bi bi-search"></i><input placeholder="Rechercher..." oninput="filterRows(this.value)" id="tSearch"/></div>
+      
+      <select class="filter-select">
+        <option>Tous entrepôts</option><option>Entrepôt A</option><option>Entrepôt B</option><option>Entrepôt C</option>
+      </select>
+      <select class="filter-select">
+        <option value="">Tous niveaux</option><option>Normal</option><option>Faible</option><option>Critique</option><option>Rupture</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center;">
+        <span id="rowCount" style="font-size:.78rem;color:var(--muted);"></span>
+        <select class="filter-select" id="perPage" onchange="setPerPage(+this.value)">
+          <option value="10">10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option>
+        </select>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrapper">
+        <table class="data-table" id="mainTable">
+          <thead><tr>
+            <th style="width:36px;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"/></th>
+            <th>Référence</th>
+<th>Produit</th>
+<th>Entrepôt</th>
+<th>Zone</th>
+<th>Qté disponible</th>
+<th>Qté réservée</th>
+<th>Valeur stock</th>
+<th>Niveau</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginationBar">
+        <span class="pg-info" id="pgInfo"></span>
+        <div class="pg-btns" id="pgBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h5 id="modalTitle"><i class="bi bi-arrow-left-right" style="color:var(--teal);margin-right:.4rem;"></i><span id="modalTitleText">Nouveau mouvement</span></h5>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Produit * *</label><select class="form-control" id="f_produit"><option value="">-- Choisir --</option><option value="Câble HDMI 2m">Câble HDMI 2m</option><option value="Papier A4">Papier A4</option><option value="Clavier sans fil">Clavier sans fil</option><option value="Écran LCD 24"">Écran LCD 24"</option><option value="Câble RJ45">Câble RJ45</option></select></div>
+<div class="form-group"><label class="form-label">Entrepôt * *</label><select class="form-control" id="f_entrepot"><option value="">-- Choisir --</option><option value="Entrepôt A">Entrepôt A</option><option value="Entrepôt B">Entrepôt B</option><option value="Entrepôt C">Entrepôt C</option></select></div>
+<div class="form-group"><label class="form-label">Zone</label><select class="form-control" id="f_zone"><option value="">-- Choisir --</option><option value="Zone A1">Zone A1</option><option value="Zone A2">Zone A2</option><option value="Zone B1">Zone B1</option><option value="Zone C1">Zone C1</option><option value="Réception">Réception</option></select></div>
+<div class="form-group"><label class="form-label">Type de mouvement</label><select class="form-control" id="f_type_mouvement"><option value="">-- Choisir --</option><option value="Entrée">Entrée</option><option value="Sortie">Sortie</option><option value="Transfert">Transfert</option><option value="Ajustement">Ajustement</option></select></div>
+<div class="form-group"><label class="form-label">Quantité *</label><input type="number" class="form-control" id="f_quantite" placeholder="0"/></div>
+<div class="form-group"><label class="form-label">Référence document</label><input type="text" class="form-control" id="f_reference_doc" placeholder="CMD-XXX, BON-XXX..."/></div>
+<div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" id="f_notes" placeholder="Observations..." rows="2"></textarea></div></div>
+      <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRow()"><i class="bi bi-check-lg"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h5><i class="bi bi-trash3-fill" style="color:var(--red);margin-right:.4rem;"></i>Confirmer la suppression</h5>
+      <button class="modal-close" onclick="closeDelModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--subtle);font-size:.875rem;">Voulez-vous vraiment supprimer <strong id="delName" style="color:var(--text);"></strong> ? Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeDelModal()">Annuler</button>
+      <button class="btn btn-danger-outline" onclick="confirmDel()"><i class="bi bi-trash3"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+let DATA = [{"id": 1, "reference": "REF-00124", "produit": "Câble HDMI 2m", "entrepot": "Entrepôt A", "zone": "Zone A1", "qte_disponible": "142", "qte_reservee": "10", "valeur": "781000", "niveau": "Normal"}, {"id": 2, "reference": "REF-00089", "produit": "Imprimante thermique", "entrepot": "Entrepôt B", "zone": "Zone B1", "qte_disponible": "1", "qte_reservee": "0", "valeur": "85000", "niveau": "Critique"}, {"id": 3, "reference": "REF-00211", "produit": "Papier A4 80g", "entrepot": "Entrepôt A", "zone": "Zone A2", "qte_disponible": "8", "qte_reservee": "2", "valeur": "36000", "niveau": "Faible"}, {"id": 4, "reference": "REF-00067", "produit": "Câble RJ45 Cat6", "entrepot": "Entrepôt A", "zone": "Zone A1", "qte_disponible": "3", "qte_reservee": "0", "valeur": "75000", "niveau": "Critique"}, {"id": 5, "reference": "REF-00412", "produit": "Écran LCD 24\"", "entrepot": "Entrepôt A", "zone": "Zone A2", "qte_disponible": "18", "qte_reservee": "3", "valeur": "5040000", "niveau": "Normal"}, {"id": 6, "reference": "REF-00301", "produit": "Clavier sans fil", "entrepot": "Entrepôt B", "zone": "Zone B1", "qte_disponible": "55", "qte_reservee": "5", "valeur": "1210000", "niveau": "Normal"}, {"id": 7, "reference": "REF-00198", "produit": "Stylos bille bleu", "entrepot": "Entrepôt B", "zone": "Zone B2", "qte_disponible": "12", "qte_reservee": "0", "valeur": "36000", "niveau": "Faible"}];
+let filtered = [...DATA];
+let currentPage = 1;
+let perPage = 10;
+let editId = null;
+let delId = null;
+
+// ── COLUMNS ──────────────────────────────────────────────────────
+const COLS = [{"key": "reference", "label": "R\u00e9f\u00e9rence", "code": true}, {"key": "produit", "label": "Produit", "main": true}, {"key": "entrepot", "label": "Entrep\u00f4t"}, {"key": "zone", "label": "Zone"}, {"key": "qte_disponible", "label": "Qt\u00e9 disponible"}, {"key": "qte_reservee", "label": "Qt\u00e9 r\u00e9serv\u00e9e"}, {"key": "valeur", "label": "Valeur stock", "money": true}, {"key": "niveau", "label": "Niveau", "badge": true}];
+const REQUIRED = ["produit", "entrepot"];
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render() {
+  const start = (currentPage-1)*perPage;
+  const rows = filtered.slice(start, start+perPage);
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><input type="checkbox" class="row-chk" value="${r.id}"/></td>
+      ${COLS.map(c=>renderCell(r,c)).join('')}
+      <td>
+        <div class="row-actions">
+          <button class="act-btn view" onclick="viewRow(${r.id})" title="Voir"><i class="bi bi-eye"></i></button>
+          <button class="act-btn edit" onclick="editRow(${r.id})" title="Modifier"><i class="bi bi-pencil"></i></button>
+          <button class="act-btn del"  onclick="askDel(${r.id})"  title="Supprimer"><i class="bi bi-trash3"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+  renderPagination();
+  document.getElementById('rowCount').textContent = `${filtered.length} résultat(s)`;
+  document.getElementById('pgInfo').textContent = `Affichage ${Math.min(start+1,filtered.length)}–${Math.min(start+perPage,filtered.length)} sur ${filtered.length}`;
+}
+
+function renderCell(r,c) {
+  const v = r[c.key] ?? '';
+  if(c.badge) return `<td>${badgeHtml(v, c.badge)}</td>`;
+  if(c.money) return `<td style="font-weight:600;color:var(--text);">${Number(v).toLocaleString('fr-FR')} BIF</td>`;
+  if(c.main) return `<td class="td-main">${v}</td>`;
+  if(c.code) return `<td><span class="td-code">${v}</span></td>`;
+  return `<td>${v}</td>`;
+}
+
+const BADGE_MAPS = {
+  'Actif':      'badge-teal',  'Inactif':   'badge-red',
+  'En cours':   'badge-blue',  'Livré':     'badge-teal',
+  'En attente': 'badge-amber', 'Annulé':    'badge-red',
+  'Payé':       'badge-teal',  'Partiel':   'badge-amber',
+  'Impayé':     'badge-red',   'Validée':   'badge-teal',
+  'Rejetée':    'badge-red',   'Brouillon': 'badge-muted',
+  'Faible':     'badge-amber', 'Critique':  'badge-red',
+  'Normal':     'badge-teal',  'Suspendu':  'badge-red',
+};
+function badgeHtml(v, map) {
+  const cls = BADGE_MAPS[v] || 'badge-muted';
+  return `<span class="badge ${cls}">${v}</span>`;
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────
+function renderPagination() {
+  const total = Math.ceil(filtered.length / perPage);
+  const btns = document.getElementById('pgBtns');
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++) {
+    if(i===1||i===total||Math.abs(i-currentPage)<=1) html+=`<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    else if(Math.abs(i-currentPage)===2) html+=`<span class="pg-btn" style="cursor:default;">…</span>`;
+  }
+  html+=`<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  btns.innerHTML = html;
+}
+function goPage(n) {
+  const total=Math.ceil(filtered.length/perPage);
+  if(n<1||n>total) return;
+  currentPage=n; render();
+}
+function setPerPage(n){perPage=n;currentPage=1;render();}
+
+// ── SEARCH / FILTER ───────────────────────────────────────────────
+function filterRows(q) {
+  const ql=q.toLowerCase();
+  filtered=DATA.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(ql)));
+  currentPage=1; render();
+}
+function doSearch(q){filterRows(q);document.getElementById('tSearch').value=q;}
+
+// ── TOGGLE ALL ────────────────────────────────────────────────────
+function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checked=cb.checked);}
+
+// ── CRUD ──────────────────────────────────────────────────────────
+function openAdd() {
+  editId=null;
+  document.getElementById('modalTitleText').textContent='Nouveau mouvement';
+  document.getElementById('modalTitle').querySelector('i').className='bi bi-arrow-left-right';
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) el.value=''; });
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('modal').classList.add('open');
+}
+function editRow(id) {
+  editId=id;
+  const r=DATA.find(x=>x.id===id);
+  document.getElementById('modalTitleText').textContent='Modifier';
+  document.getElementById('modalTitle').querySelector('i').className='bi bi-pencil';
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el&&r[c.key]!==undefined) el.value=r[c.key]; });
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('modal').classList.add('open');
+}
+function viewRow(id) {
+  const r=DATA.find(x=>x.id===id);
+  toast(Object.values(r).filter(Boolean).join(' · ').substring(0,80),'info');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function saveRow() {
+  const missing=REQUIRED.filter(k=>!document.getElementById('f_'+k)?.value.trim());
+  if(missing.length){
+    document.getElementById('formErrorMsg').textContent='Champs obligatoires manquants: '+missing.join(', ');
+    document.getElementById('formError').classList.add('show'); return;
+  }
+  const obj={id: editId||Date.now()};
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) obj[c.key]=el.value.trim()||(c.money?0:''); });
+  if(editId){
+    const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj};
+    toast('Enregistrement mis à jour','success');
+  }else{
+    DATA.unshift(obj); toast('Nouvel enregistrement ajouté','success');
+  }
+  filtered=[...DATA]; closeModal(); render();
+}
+
+function askDel(id){
+  delId=id;
+  const r=DATA.find(x=>x.id===id);
+  document.getElementById('delName').textContent=Object.values(r).slice(1,3).filter(Boolean).join(' – ');
+  document.getElementById('delModal').classList.add('open');
+}
+function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
+function confirmDel(){
+  DATA=DATA.filter(x=>x.id!==delId);
+  filtered=[...DATA]; closeDelModal(); render();
+  toast('Enregistrement supprimé','error');
+}
+
+function exportCSV(){toast('Export CSV en cours...','info');}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg,type='success'){
+  const s=document.getElementById('toastStack');
+  const t=document.createElement('div'); t.className=`toast ${type}`;
+  const ic={success:'check-circle-fill',error:'x-circle-fill',info:'info-circle-fill',warning:'exclamation-triangle-fill'};
+  const cl={success:'var(--teal)',error:'var(--red)',info:'var(--blue)',warning:'var(--amber)'};
+  t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
+  s.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

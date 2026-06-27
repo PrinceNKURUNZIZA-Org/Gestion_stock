@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Connexion</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--dark:#0a0e17;--panel:#111827;--card:#1a2233;--border:#2a3347;--teal:#10d9a0;--blue:#3b82f6;--purple:#8b5cf6;--red:#ef4444;--muted:#6b7280;--text:#f1f5f9;--subtle:#cbd5e1;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{min-height:100vh;background:var(--dark);font-family:'Inter',sans-serif;display:flex;overflow:hidden;position:relative;}
+
+/* Animated background */
+.bg-scene{position:fixed;inset:0;z-index:0;}
+.bg-grid{position:absolute;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;opacity:.18;}
+.bg-glow-1{position:absolute;width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(16,217,160,.09) 0%,transparent 70%);
+  top:-200px;left:-200px;animation:pulse1 8s ease-in-out infinite;}
+.bg-glow-2{position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.08) 0%,transparent 70%);
+  bottom:-100px;right:-100px;animation:pulse2 10s ease-in-out infinite;}
+@keyframes pulse1{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+@keyframes pulse2{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+/* Left panel */
+.left-panel{
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding:3rem;position:relative;z-index:1;
+}
+@media(max-width:900px){.left-panel{display:none;}}
+.lp-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:3rem;}
+.lp-logo .logo-box{width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;
+  box-shadow:0 0 30px rgba(16,217,160,.3);}
+.lp-logo .brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;color:var(--text);}
+.lp-logo .brand span{color:var(--teal);}
+
+.lp-headline{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:2.6rem;color:var(--text);line-height:1.15;margin-bottom:1rem;}
+.lp-headline span{background:linear-gradient(135deg,var(--teal),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.lp-sub{color:var(--muted);font-size:.95rem;line-height:1.7;max-width:440px;margin-bottom:2.5rem;}
+
+.feature-list{display:flex;flex-direction:column;gap:.75rem;}
+.feat-item{display:flex;align-items:center;gap:.75rem;font-size:.875rem;color:var(--subtle);}
+.feat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.feat-icon.t{background:rgba(16,217,160,.1);color:var(--teal);}
+.feat-icon.b{background:rgba(59,130,246,.1);color:var(--blue);}
+.feat-icon.p{background:rgba(139,92,246,.1);color:var(--purple);}
+
+.stats-strip{display:flex;gap:2rem;margin-top:3rem;}
+.sstat{text-align:center;}
+.sstat .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.5rem;color:var(--teal);}
+.sstat .lbl{font-size:.72rem;color:var(--muted);}
+
+/* Right panel / form */
+.right-panel{
+  width:480px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:2rem;position:relative;z-index:1;
+  background:rgba(17,24,39,.6);backdrop-filter:blur(20px);
+  border-left:1px solid var(--border);
+}
+@media(max-width:900px){.right-panel{width:100%;border-left:none;background:rgba(17,24,39,.85);}}
+
+.login-card{width:100%;max-width:400px;}
+.login-card .lc-logo{display:none;}
+@media(max-width:900px){.login-card .lc-logo{display:flex;align-items:center;gap:.7rem;justify-content:center;margin-bottom:2rem;}
+.lc-logo .logo-box{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:#fff;}
+.lc-logo span{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;color:var(--text);}
+.lc-logo span b{color:var(--teal);}}
+
+.lc-greeting{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.6rem;color:var(--text);margin-bottom:.3rem;}
+.lc-sub{font-size:.84rem;color:var(--muted);margin-bottom:1.75rem;}
+
+.form-label{display:block;font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:.4rem;}
+.input-wrap{position:relative;margin-bottom:1.1rem;}
+.input-wrap .ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;pointer-events:none;}
+.input-wrap input{
+  width:100%;padding:.7rem .9rem .7rem 2.5rem;
+  background:rgba(26,34,51,.8);border:1.5px solid var(--border);
+  border-radius:9px;color:var(--text);font-size:.9rem;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  font-family:'Inter',sans-serif;
+}
+.input-wrap input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(16,217,160,.12);}
+.input-wrap input::placeholder{color:var(--muted);}
+.input-wrap .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);background:none;border:none;font-size:.9rem;transition:color .15s;}
+.input-wrap .pw-toggle:hover{color:var(--teal);}
+
+.remember-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;}
+.check-label{display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle);cursor:pointer;}
+.check-label input{accent-color:var(--teal);width:14px;height:14px;}
+.forgot-link{font-size:.82rem;color:var(--teal);text-decoration:none;}
+.forgot-link:hover{color:#0fb889;}
+
+.btn-login{
+  width:100%;padding:.8rem;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  border:none;border-radius:9px;color:#fff;font-size:.95rem;font-weight:700;
+  font-family:'Space Grotesk',sans-serif;cursor:pointer;
+  transition:opacity .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+}
+.btn-login:hover{opacity:.9;transform:translateY(-1px);}
+.btn-login:active{transform:translateY(0);}
+
+.divider{display:flex;align-items:center;gap:.75rem;margin:1.3rem 0;color:var(--muted);font-size:.75rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.demo-btns{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.demo-btn{
+  padding:.55rem;border-radius:8px;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.4rem;
+  font-family:'Inter',sans-serif;
+}
+.demo-btn.t{background:rgba(16,217,160,.08);border:1px solid rgba(16,217,160,.3);color:var(--teal);}
+.demo-btn.t:hover{background:rgba(16,217,160,.15);}
+.demo-btn.b{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3);color:var(--blue);}
+.demo-btn.b:hover{background:rgba(59,130,246,.15);}
+
+.alert-error{
+  display:none;align-items:center;gap:.5rem;
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
+  border-radius:8px;padding:.65rem .9rem;
+  font-size:.82rem;color:var(--red);margin-bottom:.9rem;
+}
+.alert-error.show{display:flex;}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.spinner.show{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.lc-footer{text-align:center;margin-top:1.5rem;font-size:.75rem;color:var(--muted);}
+.lc-footer a{color:var(--teal);text-decoration:none;}
+
+/* Entry animation */
+.right-panel{animation:slideLeft .5s cubic-bezier(.16,1,.3,1) both;}
+@keyframes slideLeft{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.left-panel>*{animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both;}
+.left-panel>*:nth-child(1){animation-delay:.1s;}
+.left-panel>*:nth-child(2){animation-delay:.2s;}
+.left-panel>*:nth-child(3){animation-delay:.3s;}
+.left-panel>*:nth-child(4){animation-delay:.4s;}
+.left-panel>*:nth-child(5){animation-delay:.5s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="bg-scene"><div class="bg-grid"></div><div class="bg-glow-1"></div><div class="bg-glow-2"></div></div>
+
+<!-- LEFT -->
+<div class="left-panel">
+  <div class="lp-logo">
+    <div class="logo-box"><i class="bi bi-boxes"></i></div>
+    <span class="brand">Stock<span>Pro</span></span>
+  </div>
+  <h1 class="lp-headline">Gérez votre stock<br><span>intelligemment</span></h1>
+  <p class="lp-sub">Plateforme complète de gestion des stocks, commandes, fournisseurs et inventaires — conçue pour les entreprises burundaises.</p>
+  <div class="feature-list">
+    <div class="feat-item"><div class="feat-icon t"><i class="bi bi-box-seam-fill"></i></div>Suivi en temps réel des stocks & alertes automatiques</div>
+    <div class="feat-item"><div class="feat-icon b"><i class="bi bi-cart-check-fill"></i></div>Gestion complète des achats & commandes clients</div>
+    <div class="feat-item"><div class="feat-icon p"><i class="bi bi-graph-up-arrow"></i></div>Tableaux de bord & rapports analytiques avancés</div>
+  </div>
+  <div class="stats-strip">
+    <div class="sstat"><div class="num">1 284</div><div class="lbl">Produits</div></div>
+    <div class="sstat"><div class="num">6</div><div class="lbl">Entrepôts</div></div>
+    <div class="sstat"><div class="num">98.6%</div><div class="lbl">Fiabilité</div></div>
+    <div class="sstat"><div class="num">28</div><div class="lbl">Fournisseurs</div></div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right-panel">
+  <div class="login-card">
+    <div class="lc-logo">
+      <div class="logo-box"><i class="bi bi-boxes"></i></div>
+      <span>Stock<b>Pro</b></span>
+    </div>
+    <div class="lc-greeting">Bon retour 👋</div>
+    <p class="lc-sub">Connectez-vous à votre espace de gestion</p>
+
+    <div class="alert-error" id="alertError">
+      <i class="bi bi-exclamation-circle-fill"></i>
+      <span id="alertMsg">Identifiants incorrects.</span>
+    </div>
+
+    <div>
+      <label class="form-label">Adresse email</label>
+      <div class="input-wrap">
+        <i class="bi bi-envelope ico"></i>
+        <input type="email" id="inp-email" placeholder="admin@entreprise.bi" autocomplete="email"/>
+      </div>
+
+      <label class="form-label">Mot de passe</label>
+      <div class="input-wrap">
+        <i class="bi bi-lock ico"></i>
+        <input type="password" id="inp-pw" placeholder="••••••••" autocomplete="current-password"/>
+        <button class="pw-toggle" onclick="togglePw()"><i class="bi bi-eye" id="pwIcon"></i></button>
+      </div>
+
+      <div class="remember-row">
+        <label class="check-label"><input type="checkbox" id="remember"/> Se souvenir de moi</label>
+        <a class="forgot-link" href="#">Mot de passe oublié ?</a>
+      </div>
+
+      <button class="btn-login" onclick="doLogin()">
+        <span id="btnText"><i class="bi bi-arrow-right-circle"></i> Se connecter</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+
+    <div class="divider">Accès rapide démo</div>
+    <div class="demo-btns">
+      <button class="demo-btn t" onclick="fill('admin@demo.com','Admin123!')"><i class="bi bi-shield-fill-check"></i> Admin</button>
+      <button class="demo-btn b" onclick="fill('caisse@demo.com','Caisse1!')"><i class="bi bi-cash-register"></i> Caissier</button>
+      <button class="demo-btn b" onclick="fill('mag@demo.com','Mag123!')"><i class="bi bi-person-badge"></i> Magasinier</button>
+      <button class="demo-btn t" onclick="fill('achat@demo.com','Achat1!')"><i class="bi bi-cart3"></i> Acheteur</button>
+    </div>
+
+    <div class="lc-footer">© 2025 StockPro · <a href="#">Aide</a> · <a href="#">Confidentialité</a></div>
+  </div>
+</div>
+
+<script>
+const USERS=[
+  {email:'admin@demo.com',pw:'Admin123!',page:'dashboard.html'},
+  {email:'caisse@demo.com',pw:'Caisse1!',page:'dashboard.html'},
+  {email:'mag@demo.com',pw:'Mag123!',page:'dashboard.html'},
+  {email:'achat@demo.com',pw:'Achat1!',page:'dashboard.html'},
+];
+function fill(e,p){document.getElementById('inp-email').value=e;document.getElementById('inp-pw').value=p;}
+function togglePw(){const i=document.getElementById('inp-pw');const ic=document.getElementById('pwIcon');i.type=i.type==='password'?'text':'password';ic.className=i.type==='password'?'bi bi-eye':'bi bi-eye-slash';}
+function doLogin(){
+  const e=document.getElementById('inp-email').value.trim();
+  const p=document.getElementById('inp-pw').value;
+  const ae=document.getElementById('alertError');
+  ae.classList.remove('show');
+  if(!e||!p){document.getElementById('alertMsg').textContent='Veuillez remplir tous les champs.';ae.classList.add('show');return;}
+  document.getElementById('btnText').style.display='none';
+  document.getElementById('spinner').classList.add('show');
+  setTimeout(()=>{
+    const u=USERS.find(x=>x.email===e&&x.pw===p);
+    document.getElementById('btnText').style.display='flex';
+    document.getElementById('spinner').classList.remove('show');
+    if(u){window.location.href=u.page;}
+    else{document.getElementById('alertMsg').textContent='Email ou mot de passe incorrect. Utilisez les boutons démo ci-dessous.';ae.classList.add('show');}
+  },1200);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

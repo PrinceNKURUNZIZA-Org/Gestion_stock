@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Paiements</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+</head>
+<body>
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html">
+    <div class="logo-box"><i class="bi bi-boxes"></i></div>
+    <span class="brand-text">Stock<span>Pro</span></span>
+  </a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link " href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link " href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link " href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link " href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link " href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link " href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link " href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link " href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link " href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link " href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link " href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link active" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link " href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link " href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link " href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link " href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Paiements</span>
+    <div class="search-box"><i class="bi bi-search"></i><input id="globalSearch" placeholder="Rechercher..." oninput="doSearch(this.value)"/></div>
+    <div class="tb-btn"><i class="bi bi-bell"></i><span class="notif-dot"></span></div>
+    <a class="tb-btn" href="dashboard.html" title="Dashboard"><i class="bi bi-grid-1x2"></i></a>
+  </div>
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <span class="cur">Paiements</span>
+    </div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-credit-card-fill"></i> Paiements</h1>
+        <p>Historique des paiements reçus et effectués</p>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        
+        <button class="btn btn-ghost" onclick="exportCSV()"><i class="bi bi-download"></i> Exporter</button>
+        <button class="btn btn-primary" onclick="openAdd()"><i class="bi bi-plus-lg"></i> Enregistrer paiement</button>
+      </div>
+    </div>
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <div class="search-box" style="max-width:260px;"><i class="bi bi-search"></i><input placeholder="Rechercher..." oninput="filterRows(this.value)" id="tSearch"/></div>
+      
+      <select class="filter-select">
+        <option value="">Tous types</option><option>Reçu</option><option>Effectué</option>
+      </select>
+      <select class="filter-select">
+        <option value="">Tous modes</option><option>Espèces</option><option>Mobile Money</option><option>Virement</option><option>Chèque</option>
+      </select>
+      <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center;">
+        <span id="rowCount" style="font-size:.78rem;color:var(--muted);"></span>
+        <select class="filter-select" id="perPage" onchange="setPerPage(+this.value)">
+          <option value="10">10 / page</option><option value="25">25 / page</option><option value="50">50 / page</option>
+        </select>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrapper">
+        <table class="data-table" id="mainTable">
+          <thead><tr>
+            <th style="width:36px;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"/></th>
+            <th>Référence</th>
+<th>Type</th>
+<th>Client / Fournisseur</th>
+<th>Mode</th>
+<th>Montant</th>
+<th>Date</th>
+<th>N° Commande</th>
+<th>Statut</th>
+            <th>Actions</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="paginationBar">
+        <span class="pg-info" id="pgInfo"></span>
+        <div class="pg-btns" id="pgBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <h5 id="modalTitle"><i class="bi bi-cash-coin" style="color:var(--teal);margin-right:.4rem;"></i><span id="modalTitleText">Enregistrer paiement</span></h5>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row"><div class="form-group"><label class="form-label">Type de paiement * *</label><select class="form-control" id="f_type"><option value="">-- Choisir --</option><option value="Reçu (client)">Reçu (client)</option><option value="Effectué (fournisseur)">Effectué (fournisseur)</option></select></div>
+<div class="form-group"><label class="form-label">Client / Fournisseur * *</label><input type="text" class="form-control" id="f_tiers" placeholder="Nom du tiers"/></div>
+<div class="form-group"><label class="form-label">Montant (BIF) * *</label><input type="number" class="form-control" id="f_montant" placeholder="0"/></div>
+<div class="form-group"><label class="form-label">Mode de paiement</label><select class="form-control" id="f_mode"><option value="">-- Choisir --</option><option value="Espèces">Espèces</option><option value="Mobile Money (Lumicash)">Mobile Money (Lumicash)</option><option value="Mobile Money (Ecocash)">Mobile Money (Ecocash)</option><option value="Virement bancaire">Virement bancaire</option><option value="Chèque">Chèque</option></select></div>
+<div class="form-group"><label class="form-label">Date de paiement</label><input type="date" class="form-control" id="f_date" placeholder=""/></div>
+<div class="form-group"><label class="form-label">N° Commande / Achat lié</label><input type="text" class="form-control" id="f_commande" placeholder="CMD-XXXX ou ACH-XXXX"/></div>
+<div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" id="f_notes" placeholder="Observations..." rows="2"></textarea></div>
+<div class="form-group"><label class="form-label">Statut</label><select class="form-control" id="f_statut"><option value="">-- Choisir --</option><option value="Validé">Validé</option><option value="En attente">En attente</option><option value="Annulé">Annulé</option></select></div></div>
+      <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveRow()"><i class="bi bi-check-lg"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h5><i class="bi bi-trash3-fill" style="color:var(--red);margin-right:.4rem;"></i>Confirmer la suppression</h5>
+      <button class="modal-close" onclick="closeDelModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--subtle);font-size:.875rem;">Voulez-vous vraiment supprimer <strong id="delName" style="color:var(--text);"></strong> ? Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeDelModal()">Annuler</button>
+      <button class="btn btn-danger-outline" onclick="confirmDel()"><i class="bi bi-trash3"></i> Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+let DATA = [{"id": 1, "reference": "PAY-0312", "type": "Reçu", "tiers": "HOREB COMMERCE", "mode": "Mobile Money", "montant": "1200000", "date": "2025-06-08", "commande": "CMD-0126", "statut": "Actif"}, {"id": 2, "reference": "PAY-0311", "type": "Effectué", "tiers": "SOFILCO", "mode": "Virement", "montant": "2451999", "date": "2025-06-07", "commande": "ACH-0091", "statut": "Actif"}, {"id": 3, "reference": "PAY-0310", "type": "Reçu", "tiers": "Jean Nkurunziza", "mode": "Espèces", "montant": "377600", "date": "2025-06-05", "commande": "CMD-0125", "statut": "Actif"}, {"id": 4, "reference": "PAY-0309", "type": "Reçu", "tiers": "LYCÉE SAINT-ESPRIT", "mode": "Chèque", "montant": "2124000", "date": "2025-06-03", "commande": "CMD-0122", "statut": "Actif"}, {"id": 5, "reference": "PAY-0308", "type": "Effectué", "tiers": "AGRICO SA", "mode": "Virement", "montant": "850000", "date": "2025-06-01", "commande": "ACH-0089", "statut": "En attente"}, {"id": 6, "reference": "PAY-0307", "type": "Reçu", "tiers": "SOPHARMA SARL", "mode": "Mobile Money", "montant": "500000", "date": "2025-05-30", "commande": "CMD-0121", "statut": "Annulé"}];
+let filtered = [...DATA];
+let currentPage = 1;
+let perPage = 10;
+let editId = null;
+let delId = null;
+
+// ── COLUMNS ──────────────────────────────────────────────────────
+const COLS = [{"key": "reference", "label": "R\u00e9f\u00e9rence", "code": true}, {"key": "type", "label": "Type"}, {"key": "tiers", "label": "Client / Fournisseur", "main": true}, {"key": "mode", "label": "Mode"}, {"key": "montant", "label": "Montant", "money": true}, {"key": "date", "label": "Date"}, {"key": "commande", "label": "N\u00b0 Commande", "code": true}, {"key": "statut", "label": "Statut", "badge": true}];
+const REQUIRED = ["tiers", "montant"];
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render() {
+  const start = (currentPage-1)*perPage;
+  const rows = filtered.slice(start, start+perPage);
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><input type="checkbox" class="row-chk" value="${r.id}"/></td>
+      ${COLS.map(c=>renderCell(r,c)).join('')}
+      <td>
+        <div class="row-actions">
+          <button class="act-btn view" onclick="viewRow(${r.id})" title="Voir"><i class="bi bi-eye"></i></button>
+          <button class="act-btn edit" onclick="editRow(${r.id})" title="Modifier"><i class="bi bi-pencil"></i></button>
+          <button class="act-btn del"  onclick="askDel(${r.id})"  title="Supprimer"><i class="bi bi-trash3"></i></button>
+        </div>
+      </td>
+    </tr>`).join('');
+  renderPagination();
+  document.getElementById('rowCount').textContent = `${filtered.length} résultat(s)`;
+  document.getElementById('pgInfo').textContent = `Affichage ${Math.min(start+1,filtered.length)}–${Math.min(start+perPage,filtered.length)} sur ${filtered.length}`;
+}
+
+function renderCell(r,c) {
+  const v = r[c.key] ?? '';
+  if(c.badge) return `<td>${badgeHtml(v, c.badge)}</td>`;
+  if(c.money) return `<td style="font-weight:600;color:var(--text);">${Number(v).toLocaleString('fr-FR')} BIF</td>`;
+  if(c.main) return `<td class="td-main">${v}</td>`;
+  if(c.code) return `<td><span class="td-code">${v}</span></td>`;
+  return `<td>${v}</td>`;
+}
+
+const BADGE_MAPS = {
+  'Actif':      'badge-teal',  'Inactif':   'badge-red',
+  'En cours':   'badge-blue',  'Livré':     'badge-teal',
+  'En attente': 'badge-amber', 'Annulé':    'badge-red',
+  'Payé':       'badge-teal',  'Partiel':   'badge-amber',
+  'Impayé':     'badge-red',   'Validée':   'badge-teal',
+  'Rejetée':    'badge-red',   'Brouillon': 'badge-muted',
+  'Faible':     'badge-amber', 'Critique':  'badge-red',
+  'Normal':     'badge-teal',  'Suspendu':  'badge-red',
+};
+function badgeHtml(v, map) {
+  const cls = BADGE_MAPS[v] || 'badge-muted';
+  return `<span class="badge ${cls}">${v}</span>`;
+}
+
+// ── PAGINATION ────────────────────────────────────────────────────
+function renderPagination() {
+  const total = Math.ceil(filtered.length / perPage);
+  const btns = document.getElementById('pgBtns');
+  let html = `<button class="pg-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=total;i++) {
+    if(i===1||i===total||Math.abs(i-currentPage)<=1) html+=`<button class="pg-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    else if(Math.abs(i-currentPage)===2) html+=`<span class="pg-btn" style="cursor:default;">…</span>`;
+  }
+  html+=`<button class="pg-btn" onclick="goPage(${currentPage+1})" ${currentPage===total?'disabled':''}>›</button>`;
+  btns.innerHTML = html;
+}
+function goPage(n) {
+  const total=Math.ceil(filtered.length/perPage);
+  if(n<1||n>total) return;
+  currentPage=n; render();
+}
+function setPerPage(n){perPage=n;currentPage=1;render();}
+
+// ── SEARCH / FILTER ───────────────────────────────────────────────
+function filterRows(q) {
+  const ql=q.toLowerCase();
+  filtered=DATA.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(ql)));
+  currentPage=1; render();
+}
+function doSearch(q){filterRows(q);document.getElementById('tSearch').value=q;}
+
+// ── TOGGLE ALL ────────────────────────────────────────────────────
+function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checked=cb.checked);}
+
+// ── CRUD ──────────────────────────────────────────────────────────
+function openAdd() {
+  editId=null;
+  document.getElementById('modalTitleText').textContent='Enregistrer paiement';
+  document.getElementById('modalTitle').querySelector('i').className='bi bi-cash-coin';
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) el.value=''; });
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('modal').classList.add('open');
+}
+function editRow(id) {
+  editId=id;
+  const r=DATA.find(x=>x.id===id);
+  document.getElementById('modalTitleText').textContent='Modifier';
+  document.getElementById('modalTitle').querySelector('i').className='bi bi-pencil';
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el&&r[c.key]!==undefined) el.value=r[c.key]; });
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('modal').classList.add('open');
+}
+function viewRow(id) {
+  const r=DATA.find(x=>x.id===id);
+  toast(Object.values(r).filter(Boolean).join(' · ').substring(0,80),'info');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function saveRow() {
+  const missing=REQUIRED.filter(k=>!document.getElementById('f_'+k)?.value.trim());
+  if(missing.length){
+    document.getElementById('formErrorMsg').textContent='Champs obligatoires manquants: '+missing.join(', ');
+    document.getElementById('formError').classList.add('show'); return;
+  }
+  const obj={id: editId||Date.now()};
+  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) obj[c.key]=el.value.trim()||(c.money?0:''); });
+  if(editId){
+    const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj};
+    toast('Enregistrement mis à jour','success');
+  }else{
+    DATA.unshift(obj); toast('Nouvel enregistrement ajouté','success');
+  }
+  filtered=[...DATA]; closeModal(); render();
+}
+
+function askDel(id){
+  delId=id;
+  const r=DATA.find(x=>x.id===id);
+  document.getElementById('delName').textContent=Object.values(r).slice(1,3).filter(Boolean).join(' – ');
+  document.getElementById('delModal').classList.add('open');
+}
+function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
+function confirmDel(){
+  DATA=DATA.filter(x=>x.id!==delId);
+  filtered=[...DATA]; closeDelModal(); render();
+  toast('Enregistrement supprimé','error');
+}
+
+function exportCSV(){toast('Export CSV en cours...','info');}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg,type='success'){
+  const s=document.getElementById('toastStack');
+  const t=document.createElement('div'); t.className=`toast ${type}`;
+  const ic={success:'check-circle-fill',error:'x-circle-fill',info:'info-circle-fill',warning:'exclamation-triangle-fill'};
+  const cl={success:'var(--teal)',error:'var(--red)',info:'var(--blue)',warning:'var(--amber)'};
+  t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
+  s.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

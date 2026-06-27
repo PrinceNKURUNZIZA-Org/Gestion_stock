@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Point de Vente (POS)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+/* POS layout override */
+body { overflow: hidden; }
+.pos-wrap { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 64px); gap: 0; }
+@media(max-width:900px){ .pos-wrap { grid-template-columns:1fr; } .pos-cart { display:none; } }
+
+/* ── LEFT: products ───────────────────── */
+.pos-left { display:flex; flex-direction:column; background:var(--dark); overflow:hidden; }
+.pos-search-bar {
+  padding:.9rem 1.2rem; background:var(--panel);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:.7rem; flex-shrink:0;
+}
+.pos-search-bar .sb { flex:1; position:relative; }
+.pos-search-bar .sb i { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--muted); }
+.pos-search-bar .sb input { width:100%; padding:.55rem .9rem .55rem 2.2rem; background:var(--card); border:1.5px solid var(--border); border-radius:9px; color:var(--text); font-size:.9rem; outline:none; }
+.pos-search-bar .sb input:focus { border-color:var(--teal); }
+.pos-search-bar .sb input::placeholder { color:var(--muted); }
+
+/* Category tabs */
+.cat-tabs { display:flex; gap:.4rem; padding:.65rem 1.2rem; background:var(--panel); border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+.cat-tabs::-webkit-scrollbar { height:3px; }
+.cat-tab { padding:.35rem .85rem; border-radius:999px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:.78rem; font-weight:600; cursor:pointer; white-space:nowrap; transition:all .15s; flex-shrink:0; }
+.cat-tab:hover { border-color:var(--teal); color:var(--teal); }
+.cat-tab.active { background:var(--teal); border-color:var(--teal); color:#0a0e17; }
+
+/* Products grid */
+.prod-grid { flex:1; overflow-y:auto; padding:1rem 1.2rem; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.75rem; align-content:start; }
+.prod-grid::-webkit-scrollbar { width:5px; }
+.prod-grid::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+.prod-card {
+  background:var(--card); border:1.5px solid var(--border);
+  border-radius:var(--radius); padding:.9rem .75rem;
+  cursor:pointer; transition:all .18s; text-align:center;
+  position:relative; overflow:hidden;
+}
+.prod-card:hover { border-color:var(--teal); transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.3); }
+.prod-card:active { transform:scale(.97); }
+.prod-card .prod-icon { font-size:2rem; margin-bottom:.5rem; display:block; }
+.prod-card .prod-name { font-size:.78rem; font-weight:600; color:var(--text); margin-bottom:.3rem; line-height:1.2; }
+.prod-card .prod-price { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.9rem; color:var(--teal); }
+.prod-card .prod-stock { font-size:.68rem; color:var(--muted); margin-top:.2rem; }
+.prod-card .low-badge { position:absolute; top:5px; right:5px; background:var(--amber); color:#0a0e17; font-size:.58rem; font-weight:800; padding:.08rem .35rem; border-radius:999px; }
+.prod-card .out-badge { position:absolute; top:5px; right:5px; background:var(--red); color:#fff; font-size:.58rem; font-weight:800; padding:.08rem .35rem; border-radius:999px; }
+.prod-card.out-of-stock { opacity:.45; cursor:not-allowed; }
+
+/* ── RIGHT: cart ──────────────────────── */
+.pos-cart { background:var(--panel); border-left:1px solid var(--border); display:flex; flex-direction:column; }
+
+.cart-header { padding:.9rem 1.1rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.cart-header h4 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.95rem; color:var(--text); display:flex; align-items:center; gap:.5rem; }
+.cart-header .cart-count { background:var(--teal); color:#0a0e17; font-size:.65rem; font-weight:800; padding:.1rem .45rem; border-radius:999px; }
+
+/* Client selector */
+.client-select { padding:.7rem 1.1rem; border-bottom:1px solid var(--border); flex-shrink:0; }
+.client-select label { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:.35rem; }
+.client-select select { width:100%; padding:.5rem .8rem; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:.84rem; outline:none; appearance:none; }
+.client-select select:focus { border-color:var(--teal); }
+
+/* Cart items */
+.cart-items { flex:1; overflow-y:auto; padding:.6rem .8rem; }
+.cart-items::-webkit-scrollbar { width:4px; }
+.cart-items::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+.cart-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--muted); gap:.75rem; }
+.cart-empty i { font-size:2.5rem; opacity:.3; }
+.cart-empty p { font-size:.83rem; }
+
+.cart-item { display:flex; align-items:center; gap:.65rem; padding:.6rem .5rem; border-radius:8px; margin-bottom:.4rem; transition:background .1s; }
+.cart-item:hover { background:rgba(255,255,255,.04); }
+.cart-item .ci-name { flex:1; font-size:.82rem; font-weight:500; color:var(--text); line-height:1.2; }
+.cart-item .ci-price { font-size:.78rem; color:var(--muted); margin-top:.1rem; }
+.cart-item .qty-ctrl { display:flex; align-items:center; gap:.3rem; flex-shrink:0; }
+.qty-btn { width:24px; height:24px; border-radius:6px; border:1px solid var(--border2); background:var(--card); color:var(--subtle); font-size:.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; font-weight:700; }
+.qty-btn:hover { border-color:var(--teal); color:var(--teal); }
+.qty-val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.88rem; color:var(--text); min-width:24px; text-align:center; }
+.ci-total { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.85rem; color:var(--teal); min-width:75px; text-align:right; flex-shrink:0; }
+.ci-del { width:22px; height:22px; border-radius:5px; border:none; background:transparent; color:var(--muted); cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:color .12s; }
+.ci-del:hover { color:var(--red); }
+
+/* Cart footer totals */
+.cart-totals { padding:.8rem 1.1rem; border-top:1px solid var(--border); flex-shrink:0; }
+.tot-row { display:flex; justify-content:space-between; font-size:.82rem; color:var(--muted); margin-bottom:.35rem; }
+.tot-row.main { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text); margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--border2); }
+.tot-row.main .amount { color:var(--teal); font-size:1.15rem; }
+
+/* Discount row */
+.discount-row { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; }
+.discount-row label { font-size:.72rem; color:var(--muted); white-space:nowrap; }
+.discount-row input { flex:1; padding:.38rem .6rem; background:var(--card); border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:.82rem; outline:none; }
+.discount-row input:focus { border-color:var(--teal); }
+.discount-row select { padding:.38rem .6rem; background:var(--card); border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:.78rem; outline:none; appearance:none; }
+
+/* Payment section */
+.pay-section { padding:.8rem 1.1rem; border-top:1px solid var(--border); flex-shrink:0; }
+.pay-methods { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin-bottom:.7rem; }
+.pay-method { padding:.55rem; border-radius:8px; border:1.5px solid var(--border); background:transparent; color:var(--muted); font-size:.75rem; font-weight:600; cursor:pointer; text-align:center; transition:all .15s; display:flex; flex-direction:column; align-items:center; gap:.2rem; }
+.pay-method i { font-size:1.1rem; }
+.pay-method:hover { border-color:var(--teal); color:var(--teal); }
+.pay-method.selected { border-color:var(--teal); background:var(--teal-dim); color:var(--teal); }
+
+.pay-input-row { display:flex; gap:.5rem; margin-bottom:.7rem; }
+.pay-input-row input { flex:1; padding:.55rem .8rem; background:var(--card); border:1.5px solid var(--border); border-radius:8px; color:var(--text); font-size:.88rem; outline:none; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+.pay-input-row input:focus { border-color:var(--teal); }
+.pay-input-row .monnaie { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:90px; padding:.5rem; background:rgba(16,217,160,.08); border:1px solid rgba(16,217,160,.2); border-radius:8px; }
+.pay-input-row .monnaie .lbl { font-size:.65rem; color:var(--muted); }
+.pay-input-row .monnaie .val { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.95rem; color:var(--teal); }
+
+.btn-pay { width:100%; padding:.75rem; background:linear-gradient(135deg,var(--teal),var(--blue)); border:none; border-radius:10px; color:#fff; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; transition:opacity .2s,transform .15s; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+.btn-pay:hover { opacity:.9; transform:translateY(-1px); }
+.btn-pay:active { transform:translateY(0); }
+.btn-pay:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+
+.btn-clear { width:100%; padding:.5rem; background:transparent; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:.8rem; cursor:pointer; margin-top:.5rem; transition:all .15s; }
+.btn-clear:hover { border-color:var(--red); color:var(--red); }
+
+/* Quick amounts */
+.quick-amts { display:grid; grid-template-columns:repeat(4,1fr); gap:.35rem; margin-bottom:.65rem; }
+.qa-btn { padding:.42rem .3rem; border-radius:7px; border:1px solid var(--border2); background:var(--card); color:var(--subtle); font-size:.72rem; font-weight:600; cursor:pointer; text-align:center; transition:all .12s; }
+.qa-btn:hover { border-color:var(--teal); color:var(--teal); }
+
+/* Receipt modal */
+.receipt { font-family:'Courier New',monospace; font-size:.82rem; color:var(--text); }
+.receipt-title { text-align:center; font-size:1rem; font-weight:700; margin-bottom:.5rem; }
+.receipt-divider { border-top:1px dashed var(--border2); margin:.6rem 0; }
+.receipt-row { display:flex; justify-content:space-between; margin-bottom:.2rem; }
+.receipt-total { display:flex; justify-content:space-between; font-weight:700; font-size:.95rem; }
+
+/* Toast */
+.pos-toast { position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:.4rem; align-items:center; }
+.pos-t { background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:.6rem 1.2rem; font-size:.83rem; color:var(--text); box-shadow:0 8px 24px rgba(0,0,0,.4); animation:toastIn .25s ease; display:flex; align-items:center; gap:.5rem; }
+.pos-t.success { border-left:3px solid var(--teal); }
+.pos-t.error { border-left:3px solid var(--red); }
+@keyframes toastIn { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+/* Receipt modal */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:380px;max-height:90vh;overflow-y:auto;animation:modalIn .22s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-bottom:1px solid var(--border);}
+.modal-header h5{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.93rem;color:var(--text);}
+.modal-close{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{border-color:var(--red);color:var(--red);}
+.modal-body{padding:1.2rem 1.3rem;}
+.modal-footer{padding:.9rem 1.3rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.5rem;}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .9rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:'Inter',sans-serif;}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--subtle);}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html"><div class="logo-box"><i class="bi bi-boxes"></i></div><span class="brand-text">Stock<span>Pro</span></span></a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link active" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Caissier</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title"><i class="bi bi-cash-register" style="color:var(--teal);margin-right:.4rem;"></i>Point de Vente</span>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-left:auto;">
+      <span style="font-size:.78rem;color:var(--muted);" id="posTime"></span>
+      <div class="tb-btn" title="Caisse ouverte" style="border-color:rgba(16,217,160,.4);color:var(--teal);"><i class="bi bi-lock-open"></i></div>
+      <div class="tb-btn" title="Dernier reçu" onclick="showLastReceipt()"><i class="bi bi-receipt"></i></div>
+      <a class="tb-btn" href="commandes.html" title="Historique ventes"><i class="bi bi-clock-history"></i></a>
+    </div>
+  </div>
+
+  <div class="pos-wrap">
+    <!-- ── LEFT ──────────────────────────── -->
+    <div class="pos-left">
+      <!-- Search bar -->
+      <div class="pos-search-bar">
+        <div class="sb">
+          <i class="bi bi-search"></i>
+          <input id="prodSearch" placeholder="Rechercher un produit ou scanner un code-barres..." oninput="filterProds(this.value)" autofocus/>
+        </div>
+        <div style="font-size:.75rem;color:var(--muted);white-space:nowrap;"><i class="bi bi-upc-scan" style="margin-right:.3rem;"></i>Code-barres</div>
+      </div>
+
+      <!-- Category tabs -->
+      <div class="cat-tabs">
+        <button class="cat-tab active" onclick="setcat('',this)">Tous</button>
+        <button class="cat-tab" onclick="setcat('Informatique',this)">🖥 Informatique</button>
+        <button class="cat-tab" onclick="setcat('Fournitures',this)">📎 Fournitures</button>
+        <button class="cat-tab" onclick="setcat('Électronique',this)">📱 Électronique</button>
+        <button class="cat-tab" onclick="setcat('Mobilier',this)">🪑 Mobilier</button>
+        <button class="cat-tab" onclick="setcat('Alimentaire',this)">🍎 Alimentaire</button>
+        <button class="cat-tab" onclick="setcat('Pharmacie',this)">💊 Pharmacie</button>
+      </div>
+
+      <!-- Products grid -->
+      <div class="prod-grid" id="prodGrid"></div>
+    </div>
+
+    <!-- ── RIGHT: CART ────────────────────── -->
+    <div class="pos-cart">
+      <!-- Header -->
+      <div class="cart-header">
+        <h4><i class="bi bi-cart3"></i> Panier <span class="cart-count" id="cartCount">0</span></h4>
+        <div style="display:flex;gap:.4rem;">
+          <button class="tb-btn" title="Mettre en attente" onclick="holdCart()"><i class="bi bi-pause-circle"></i></button>
+          <button class="tb-btn" title="Récupérer attente" onclick="recallHold()"><i class="bi bi-play-circle"></i></button>
+        </div>
+      </div>
+
+      <!-- Client -->
+      <div class="client-select">
+        <label><i class="bi bi-person" style="margin-right:.3rem;"></i>Client</label>
+        <select id="selClient">
+          <option value="">— Client anonyme —</option>
+          <option value="CLI-001">SOPHARMA SARL</option>
+          <option value="CLI-002">HOREB COMMERCE</option>
+          <option value="CLI-003">Jean Nkurunziza</option>
+          <option value="CLI-004">Marie Kabura</option>
+          <option value="CLI-005">MAIRIE DE BUJUMBURA</option>
+        </select>
+      </div>
+
+      <!-- Cart items -->
+      <div class="cart-items" id="cartItems">
+        <div class="cart-empty" id="cartEmpty">
+          <i class="bi bi-cart-x"></i>
+          <p>Le panier est vide<br><span style="font-size:.75rem;opacity:.7;">Cliquez sur un produit pour l'ajouter</span></p>
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div class="cart-totals">
+        <div class="tot-row"><span>Sous-total HT</span><span id="subHT">0 BIF</span></div>
+        <div class="discount-row">
+          <label>Remise</label>
+          <input type="number" id="discountVal" placeholder="0" min="0" oninput="recalc()"/>
+          <select id="discountType" onchange="recalc()">
+            <option value="pct">%</option>
+            <option value="fixed">BIF</option>
+          </select>
+        </div>
+        <div class="tot-row"><span>Remise</span><span id="discountLine" style="color:var(--red);">— 0 BIF</span></div>
+        <div class="tot-row"><span>TVA (18%)</span><span id="tvaLine">0 BIF</span></div>
+        <div class="tot-row main"><span>TOTAL TTC</span><span class="amount" id="totalTTC">0 BIF</span></div>
+      </div>
+
+      <!-- Payment -->
+      <div class="pay-section">
+        <div class="pay-methods" id="payMethods">
+          <button class="pay-method selected" onclick="selPay(this,'Espèces')"><i class="bi bi-cash-coin"></i>Espèces</button>
+          <button class="pay-method" onclick="selPay(this,'Mobile Money')"><i class="bi bi-phone-fill"></i>Mobile Money</button>
+          <button class="pay-method" onclick="selPay(this,'Carte')"><i class="bi bi-credit-card"></i>Carte</button>
+          <button class="pay-method" onclick="selPay(this,'Virement')"><i class="bi bi-bank"></i>Virement</button>
+        </div>
+        <div class="quick-amts">
+          <button class="qa-btn" onclick="setAmt(5000)">5K</button>
+          <button class="qa-btn" onclick="setAmt(10000)">10K</button>
+          <button class="qa-btn" onclick="setAmt(20000)">20K</button>
+          <button class="qa-btn" onclick="setAmt(50000)">50K</button>
+          <button class="qa-btn" onclick="setAmt(100000)">100K</button>
+          <button class="qa-btn" onclick="setAmt(500000)">500K</button>
+          <button class="qa-btn" onclick="setAmt(1000000)">1M</button>
+          <button class="qa-btn" onclick="setExact()">Exact</button>
+        </div>
+        <div class="pay-input-row">
+          <input type="number" id="amountGiven" placeholder="Montant reçu..." oninput="calcMonnaie()"/>
+          <div class="monnaie">
+            <span class="lbl">Monnaie</span>
+            <span class="val" id="monnaie">0 BIF</span>
+          </div>
+        </div>
+        <button class="btn-pay" id="btnPay" onclick="processPayment()" disabled>
+          <i class="bi bi-check-circle-fill"></i> Encaisser
+        </button>
+        <button class="btn-clear" onclick="clearCart()"><i class="bi bi-x-circle" style="margin-right:.3rem;"></i>Annuler la vente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h5><i class="bi bi-receipt" style="color:var(--teal);margin-right:.4rem;"></i>Reçu de vente</h5>
+      <button class="modal-close" onclick="closeReceipt()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="receipt" id="receiptContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReceipt()">Fermer</button>
+      <button class="btn btn-ghost" onclick="posToast('Email envoyé ✓','success')"><i class="bi bi-envelope"></i> Email</button>
+      <button class="btn btn-primary" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="pos-toast" id="posToastStack"></div>
+
+<script>
+// ── PRODUCTS ──────────────────────────────────────────────────────
+const PRODUCTS = [
+  {id:1,ref:'REF-00124',name:'Câble HDMI 2m',cat:'Informatique',price:5500,stock:142,icon:'🔌',tva:18},
+  {id:2,ref:'REF-00089',name:'Imprimante thermique',cat:'Informatique',price:120000,stock:1,icon:'🖨️',tva:18},
+  {id:3,ref:'REF-00211',name:'Papier A4 80g (rame)',cat:'Fournitures',price:6000,stock:8,icon:'📄',tva:10},
+  {id:4,ref:'REF-00345',name:'Chaise ergonomique',cat:'Mobilier',price:180000,stock:34,icon:'🪑',tva:18},
+  {id:5,ref:'REF-00067',name:'Câble RJ45 Cat6 100m',cat:'Informatique',price:38000,stock:3,icon:'🌐',tva:18},
+  {id:6,ref:'REF-00198',name:'Stylos bille bleu (bte)',cat:'Fournitures',price:4500,stock:12,icon:'✒️',tva:10},
+  {id:7,ref:'REF-00412',name:'Écran LCD 24"',cat:'Électronique',price:380000,stock:18,icon:'🖥️',tva:18},
+  {id:8,ref:'REF-00512',name:'Table de réunion 8P',cat:'Mobilier',price:900000,stock:4,icon:'🪵',tva:18},
+  {id:9,ref:'REF-00274',name:'Agrafe Rapid 23/6 (bte)',cat:'Fournitures',price:2000,stock:5,icon:'📌',tva:10},
+  {id:10,ref:'REF-00301',name:'Clavier sans fil',cat:'Informatique',price:32000,stock:55,icon:'⌨️',tva:18},
+  {id:11,ref:'REF-00501',name:'Souris optique USB',cat:'Informatique',price:12000,stock:40,icon:'🖱️',tva:18},
+  {id:12,ref:'REF-00601',name:'Sérum physio 500ml',cat:'Pharmacie',price:3800,stock:48,icon:'💉',tva:0},
+  {id:13,ref:'REF-00714',name:'Gel antiseptique 1L',cat:'Pharmacie',price:6000,stock:12,icon:'🧴',tva:0},
+  {id:14,ref:'REF-00801',name:'Lait en poudre 2kg',cat:'Alimentaire',price:14500,stock:24,icon:'🥛',tva:10},
+  {id:15,ref:'REF-00901',name:'Biscuits LU 250g',cat:'Alimentaire',price:3200,stock:60,icon:'🍪',tva:10},
+  {id:16,ref:'REF-01001',name:'Lampe LED bureau',cat:'Électronique',price:18000,stock:22,icon:'💡',tva:18},
+  {id:17,ref:'REF-01101',name:'Classeur A4 80mm',cat:'Fournitures',price:2500,stock:0,icon:'📁',tva:10},
+  {id:18,ref:'REF-01201',name:'Disque dur externe 1TB',cat:'Informatique',price:95000,stock:8,icon:'💾',tva:18},
+];
+
+let cart = {};
+let filteredProds = [...PRODUCTS];
+let currentCat = '';
+let selectedPayMethod = 'Espèces';
+let lastSale = null;
+
+// ── TIME ──────────────────────────────────────────────────────────
+function updateTime(){
+  document.getElementById('posTime').textContent = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateTime,1000); updateTime();
+
+// ── RENDER PRODUCTS ───────────────────────────────────────────────
+function renderProds(){
+  const grid = document.getElementById('prodGrid');
+  grid.innerHTML = filteredProds.map(p => {
+    const out = p.stock === 0;
+    const low = p.stock > 0 && p.stock <= 5;
+    return `<div class="prod-card ${out?'out-of-stock':''}" onclick="${out?'':'addToCart('+p.id+')'}">
+      ${low && !out ? '<span class="low-badge">Faible</span>' : ''}
+      ${out ? '<span class="out-badge">Rupture</span>' : ''}
+      <span class="prod-icon">${p.icon}</span>
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-price">${fmt(p.price)}</div>
+      <div class="prod-stock">Stock: ${p.stock}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterProds(q){
+  const ql = q.toLowerCase();
+  filteredProds = PRODUCTS.filter(p =>
+    (p.name.toLowerCase().includes(ql) || p.ref.toLowerCase().includes(ql)) &&
+    (!currentCat || p.cat === currentCat)
+  );
+  renderProds();
+}
+
+function setcat(cat, btn){
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filteredProds = PRODUCTS.filter(p => !cat || p.cat === cat);
+  renderProds();
+}
+
+// ── CART ──────────────────────────────────────────────────────────
+function addToCart(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p || p.stock === 0) return;
+  if(cart[id]){
+    if(cart[id].qty >= p.stock){ posToast('Stock insuffisant !','error'); return; }
+    cart[id].qty++;
+  } else {
+    cart[id] = {prod:p, qty:1};
+  }
+  renderCart();
+  posToast(`${p.name} ajouté ✓`,'success');
+}
+
+function changeQty(id, delta){
+  if(!cart[id]) return;
+  cart[id].qty += delta;
+  if(cart[id].qty <= 0) delete cart[id];
+  else if(cart[id].qty > cart[id].prod.stock){
+    cart[id].qty--;
+    posToast('Stock insuffisant !','error');
+  }
+  renderCart();
+}
+
+function removeFromCart(id){ delete cart[id]; renderCart(); }
+
+function clearCart(){ cart={}; document.getElementById('amountGiven').value=''; renderCart(); }
+
+function renderCart(){
+  const items = Object.entries(cart);
+  const empty = document.getElementById('cartEmpty');
+  const container = document.getElementById('cartItems');
+  document.getElementById('cartCount').textContent = items.reduce((s,[,v])=>s+v.qty,0);
+
+  if(!items.length){
+    empty.style.display='flex';
+    [...container.querySelectorAll('.cart-item')].forEach(e=>e.remove());
+    recalc(); updatePayBtn(); return;
+  }
+  empty.style.display='none';
+
+  // Remove old items
+  [...container.querySelectorAll('.cart-item')].forEach(e=>e.remove());
+
+  items.forEach(([id,{prod,qty}]) => {
+    const div = document.createElement('div');
+    div.className='cart-item'; div.id=`ci-${id}`;
+    div.innerHTML=`
+      <span style="font-size:1.2rem;flex-shrink:0;">${prod.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="ci-name">${prod.name}</div>
+        <div class="ci-price">${fmt(prod.price)} / unité</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+        <span class="qty-val">${qty}</span>
+        <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+      </div>
+      <div class="ci-total">${fmt(prod.price*qty)}</div>
+      <button class="ci-del" onclick="removeFromCart(${id})" title="Retirer"><i class="bi bi-x"></i></button>`;
+    container.insertBefore(div, empty);
+  });
+  recalc(); updatePayBtn();
+}
+
+// ── TOTALS ────────────────────────────────────────────────────────
+function getSubHT(){
+  return Object.values(cart).reduce((s,{prod,qty})=>s+(prod.price*qty),0);
+}
+function getTVA(base){
+  // weighted TVA per item
+  return Object.values(cart).reduce((s,{prod,qty})=>s+(prod.price*qty*prod.tva/100),0);
+}
+
+function recalc(){
+  const subHT = getSubHT();
+  const discVal = +document.getElementById('discountVal').value || 0;
+  const discType = document.getElementById('discountType').value;
+  const discount = discType==='pct' ? subHT*discVal/100 : Math.min(discVal,subHT);
+  const base = subHT - discount;
+  const tva = getTVA(base);
+  const total = base + tva;
+
+  document.getElementById('subHT').textContent = fmt(subHT);
+  document.getElementById('discountLine').textContent = '— ' + fmt(Math.round(discount));
+  document.getElementById('tvaLine').textContent = fmt(Math.round(tva));
+  document.getElementById('totalTTC').textContent = fmt(Math.round(total));
+  calcMonnaie();
+}
+
+function calcMonnaie(){
+  const total = parseFmt(document.getElementById('totalTTC').textContent);
+  const given = +document.getElementById('amountGiven').value || 0;
+  const change = given - total;
+  const el = document.getElementById('monnaie');
+  el.textContent = change >= 0 ? fmt(change) : '—';
+  el.style.color = change >= 0 ? 'var(--teal)' : 'var(--red)';
+  updatePayBtn();
+}
+
+function updatePayBtn(){
+  const total = parseFmt(document.getElementById('totalTTC').textContent);
+  const given = +document.getElementById('amountGiven').value || 0;
+  const hasItems = Object.keys(cart).length > 0;
+  const canPay = hasItems && (selectedPayMethod !== 'Espèces' || given >= total);
+  document.getElementById('btnPay').disabled = !canPay;
+}
+
+function parseFmt(s){ return +s.replace(/\s/g,'').replace('BIF','').replace(/\./g,'') || 0; }
+function fmt(n){ return Number(n).toLocaleString('fr-FR') + ' BIF'; }
+
+// ── PAYMENT ───────────────────────────────────────────────────────
+function selPay(btn, method){
+  selectedPayMethod = method;
+  document.querySelectorAll('.pay-method').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  if(method !== 'Espèces'){ document.getElementById('amountGiven').value=''; document.getElementById('monnaie').textContent='N/A'; }
+  updatePayBtn();
+}
+
+function setAmt(v){ document.getElementById('amountGiven').value = v; calcMonnaie(); updatePayBtn(); }
+function setExact(){
+  const total = parseFmt(document.getElementById('totalTTC').textContent);
+  document.getElementById('amountGiven').value = total;
+  calcMonnaie(); updatePayBtn();
+}
+
+function processPayment(){
+  if(!Object.keys(cart).length) return;
+  const subHT = getSubHT();
+  const total = parseFmt(document.getElementById('totalTTC').textContent);
+  const given = +document.getElementById('amountGiven').value || total;
+  const client = document.getElementById('selClient').options[document.getElementById('selClient').selectedIndex].text;
+  const num = 'VTE-' + String(Math.floor(Math.random()*9000)+1000);
+
+  lastSale = {
+    num, client, date: new Date().toLocaleString('fr-FR'),
+    method: selectedPayMethod,
+    items: Object.values(cart).map(({prod,qty})=>({name:prod.name,qty,price:prod.price,total:prod.price*qty})),
+    subHT, total, given, change: given-total
+  };
+
+  buildReceipt(lastSale);
+  document.getElementById('receiptModal').classList.add('open');
+  posToast(`Vente ${num} encaissée — ${fmt(total)}`,'success');
+  clearCart();
+}
+
+function buildReceipt(s){
+  const lines = s.items.map(i=>
+    `<div class="receipt-row"><span>${i.name} x${i.qty}</span><span>${fmt(i.total)}</span></div>`
+  ).join('');
+  document.getElementById('receiptContent').innerHTML = `
+    <div class="receipt-title">StockPro SARL</div>
+    <div style="text-align:center;font-size:.74rem;color:var(--muted);margin-bottom:.4rem;">Avenue de la Liberté, Bujumbura<br>Tel: +257 22 20 00 00</div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-row"><span>Reçu N°</span><span><b>${s.num}</b></span></div>
+    <div class="receipt-row"><span>Date</span><span>${s.date}</span></div>
+    <div class="receipt-row"><span>Client</span><span>${s.client}</span></div>
+    <div class="receipt-row"><span>Caissier</span><span>Admin Système</span></div>
+    <div class="receipt-divider"></div>
+    ${lines}
+    <div class="receipt-divider"></div>
+    <div class="receipt-row"><span>Sous-total HT</span><span>${fmt(s.subHT)}</span></div>
+    <div class="receipt-total"><span>TOTAL TTC</span><span>${fmt(s.total)}</span></div>
+    <div class="receipt-row" style="margin-top:.3rem;"><span>Reçu (${s.method})</span><span>${fmt(s.given)}</span></div>
+    <div class="receipt-row"><span>Monnaie rendue</span><span style="color:var(--teal);font-weight:700;">${fmt(Math.max(0,s.change))}</span></div>
+    <div class="receipt-divider"></div>
+    <div style="text-align:center;font-size:.72rem;color:var(--muted);">Merci pour votre achat !<br>Conservez ce reçu comme preuve de paiement.</div>`;
+}
+
+function showLastReceipt(){ if(lastSale){ buildReceipt(lastSale); document.getElementById('receiptModal').classList.add('open'); } else posToast('Aucune vente récente','error'); }
+function closeReceipt(){ document.getElementById('receiptModal').classList.remove('open'); }
+
+function holdCart(){ posToast('Panier mis en attente','success'); }
+function recallHold(){ posToast('Aucun panier en attente','error'); }
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function posToast(msg, type='success'){
+  const s = document.getElementById('posToastStack');
+  const t = document.createElement('div');
+  t.className = `pos-t ${type}`;
+  const ic = type==='success'?'check-circle-fill':'x-circle-fill';
+  const cl = type==='success'?'var(--teal)':'var(--red)';
+  t.innerHTML = `<i class="bi bi-${ic}" style="color:${cl};"></i>${msg}`;
+  s.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+renderProds();
+renderCart();
+</script>
+</body>
+</html>

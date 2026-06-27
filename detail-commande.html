@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Détail Commande</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+.detail-layout { display:grid; grid-template-columns:1fr 300px; gap:1.2rem; align-items:start; }
+@media(max-width:900px){ .detail-layout { grid-template-columns:1fr; } }
+
+.sec-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem; margin-bottom:1rem; }
+.sec-title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.88rem; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; padding-bottom:.7rem; border-bottom:1px solid var(--border); }
+.sec-title i { color:var(--teal); }
+
+/* Info grid */
+.info-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:.9rem; }
+.info-item .lbl { font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.25rem; }
+.info-item .val { font-size:.88rem; color:var(--text); font-weight:500; }
+.info-item .val.mono { font-family:'Space Grotesk',sans-serif; font-weight:700; }
+.info-item .val.green { color:var(--teal); }
+.info-item .val.amber { color:var(--amber); }
+.info-item .val.red { color:var(--red); }
+
+/* Table */
+.det-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.det-table th { padding:.55rem .8rem; text-align:left; font-size:.65rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); white-space:nowrap; }
+.det-table td { padding:.65rem .8rem; color:var(--subtle); border-bottom:1px solid rgba(42,51,71,.4); vertical-align:middle; }
+.det-table tr:last-child td { border-bottom:none; }
+.td-main { color:var(--text) !important; font-weight:500; }
+
+/* Timeline */
+.timeline { position:relative; padding-left:1.6rem; }
+.timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:var(--border); }
+.tl-item { position:relative; margin-bottom:1.1rem; }
+.tl-item:last-child { margin-bottom:0; }
+.tl-dot { width:16px; height:16px; border-radius:50%; position:absolute; left:-1.6rem; top:2px; border:2px solid var(--panel); flex-shrink:0; }
+.tl-item .tl-title { font-size:.83rem; font-weight:600; color:var(--text); margin-bottom:.15rem; }
+.tl-item .tl-meta { font-size:.74rem; color:var(--muted); }
+.tl-item .tl-note { font-size:.76rem; color:var(--subtle); margin-top:.2rem; background:var(--panel); border-radius:6px; padding:.3rem .6rem; display:inline-block; }
+
+/* Payment panel */
+.pay-row { display:flex; justify-content:space-between; align-items:center; padding:.5rem 0; border-bottom:1px solid rgba(42,51,71,.4); font-size:.83rem; }
+.pay-row:last-child { border-bottom:none; }
+.pay-label { color:var(--muted); }
+.pay-value { font-weight:600; color:var(--text); }
+.pay-total { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; }
+.pay-total .pay-value { color:var(--teal); }
+
+/* Action buttons sidebar */
+.action-list { display:flex; flex-direction:column; gap:.5rem; }
+.act-item-btn { display:flex; align-items:center; gap:.6rem; padding:.65rem .9rem; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--subtle); font-size:.83rem; font-weight:500; cursor:pointer; transition:all .15s; width:100%; text-align:left; text-decoration:none; }
+.act-item-btn:hover { border-color:var(--teal); color:var(--teal); background:rgba(16,217,160,.04); }
+.act-item-btn i { font-size:.95rem; width:18px; text-align:center; color:inherit; }
+.act-item-btn.danger:hover { border-color:var(--red); color:var(--red); background:rgba(239,68,68,.04); }
+
+/* Status badge */
+.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:700; }
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.badge-teal { background:rgba(16,217,160,.1); color:var(--teal); }
+.badge-blue { background:rgba(59,130,246,.1); color:var(--blue); }
+.badge-amber { background:rgba(245,158,11,.1); color:var(--amber); }
+.badge-red { background:rgba(239,68,68,.1); color:var(--red); }
+.badge-muted { background:rgba(107,114,128,.15); color:var(--muted); }
+.badge-green { background:rgba(34,197,94,.1); color:var(--green); }
+
+/* Paiement form inline */
+.pay-form { background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:1rem; margin-top:.8rem; display:none; }
+.pay-form.show { display:block; }
+.form-control { width:100%; padding:.58rem .85rem; background:var(--card); border:1.5px solid var(--border); border-radius:8px; color:var(--text); font-size:.875rem; outline:none; transition:border-color .2s; font-family:'Inter',sans-serif; margin-bottom:.7rem; }
+.form-control:focus { border-color:var(--teal); }
+.form-control::placeholder { color:var(--muted); }
+select.form-control { appearance:none; cursor:pointer; }
+.form-label { display:block; font-size:.68rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:.35rem; }
+.btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem .9rem; border-radius:8px; font-size:.83rem; font-weight:600; cursor:pointer; transition:all .15s; border:none; font-family:'Inter',sans-serif; }
+.btn-primary { background:linear-gradient(135deg,var(--teal),var(--blue)); color:#fff; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--subtle); }
+.btn-ghost:hover { border-color:var(--teal); color:var(--teal); }
+.btn-sm { padding:.38rem .7rem; font-size:.78rem; }
+
+/* Toast */
+.toast-stack { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.4rem; }
+.toast { background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:.7rem 1rem; display:flex; align-items:center; gap:.6rem; font-size:.82rem; color:var(--text); min-width:240px; box-shadow:0 8px 24px rgba(0,0,0,.4); animation:toastIn .25s ease; }
+.toast.success { border-left:3px solid var(--teal); }
+.toast.error { border-left:3px solid var(--red); }
+.toast.info { border-left:3px solid var(--blue); }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);} }
+
+@media print {
+  .sidebar,.topbar,.action-list,.pay-form { display:none!important; }
+  .main { margin-left:0!important; }
+  .detail-layout { grid-template-columns:1fr!important; }
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html"><div class="logo-box"><i class="bi bi-boxes"></i></div><span class="brand-text">Stock<span>Pro</span></span></a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link active" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Détail Commande <span style="color:var(--teal);font-family:'Space Grotesk',sans-serif;">#CMD-0127</span></span>
+    <div style="display:flex;gap:.5rem;margin-left:auto;">
+      <a class="btn btn-ghost btn-sm" href="commandes.html"><i class="bi bi-arrow-left"></i> Retour</a>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer</button>
+      <button class="btn btn-ghost btn-sm" onclick="sendEmail()"><i class="bi bi-envelope"></i> Envoyer</button>
+      <a class="btn btn-primary btn-sm" href="nouvelle-commande.html"><i class="bi bi-pencil"></i> Modifier</a>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="breadcrumb">
+      <a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <a href="commandes.html">Commandes</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <span class="cur">CMD-0127</span>
+    </div>
+
+    <!-- Header strip -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.2rem;">
+      <div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;color:var(--text);display:flex;align-items:center;gap:.6rem;">
+          <i class="bi bi-cart3" style="color:var(--teal);"></i>
+          Commande #CMD-0127
+          <span class="badge badge-blue">En cours</span>
+          <span class="badge badge-amber">Paiement partiel</span>
+        </h1>
+        <p style="font-size:.83rem;color:var(--muted);margin-top:.2rem;">Créée le 08 juin 2025 à 09h30 par Admin Système</p>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="changeStatus('En cours')"><i class="bi bi-arrow-right-circle"></i> En cours</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--teal);border-color:rgba(16,217,160,.3);" onclick="changeStatus('Livré')"><i class="bi bi-check-circle"></i> Marquer livré</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:rgba(239,68,68,.3);" onclick="changeStatus('Annulé')"><i class="bi bi-x-circle"></i> Annuler</button>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <!-- LEFT -->
+      <div>
+        <!-- General Info -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-info-circle-fill"></i>Informations générales</div>
+          <div class="info-grid">
+            <div class="info-item"><div class="lbl">N° Commande</div><div class="val mono text-teal">CMD-0127</div></div>
+            <div class="info-item"><div class="lbl">Client</div><div class="val">SOPHARMA SARL</div></div>
+            <div class="info-item"><div class="lbl">Date commande</div><div class="val">08/06/2025</div></div>
+            <div class="info-item"><div class="lbl">Date livraison prévue</div><div class="val">15/06/2025</div></div>
+            <div class="info-item"><div class="lbl">Mode livraison</div><div class="val">Livraison à domicile</div></div>
+            <div class="info-item"><div class="lbl">Commercial</div><div class="val">Admin Système</div></div>
+            <div class="info-item"><div class="lbl">Conditions paiement</div><div class="val">30 jours</div></div>
+            <div class="info-item"><div class="lbl">Statut</div><div class="val"><span class="badge badge-blue">En cours</span></div></div>
+          </div>
+          <!-- Client card -->
+          <div style="margin-top:1rem;padding:1rem;background:var(--panel);border:1px solid var(--border);border-radius:9px;display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,.1);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;"><i class="bi bi-building"></i></div>
+            <div style="flex:1;min-width:160px;">
+              <div style="font-weight:700;font-size:.9rem;color:var(--text);">SOPHARMA SARL</div>
+              <div style="font-size:.79rem;color:var(--muted);margin-top:.2rem;"><i class="bi bi-telephone" style="margin-right:.3rem;"></i>+257 22 30 11 22</div>
+              <div style="font-size:.79rem;color:var(--muted);margin-top:.1rem;"><i class="bi bi-envelope" style="margin-right:.3rem;"></i>sopharma@sopharma.bi</div>
+              <div style="font-size:.79rem;color:var(--muted);margin-top:.1rem;"><i class="bi bi-geo-alt" style="margin-right:.3rem;"></i>Zone Commerciale, Bujumbura</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;">
+              <span class="badge badge-teal">Client actif</span>
+              <div style="font-size:.75rem;color:var(--red);font-weight:600;">Solde dû: 3,2M BIF</div>
+              <a href="clients.html" class="btn btn-ghost btn-sm" style="font-size:.73rem;">Voir fiche →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product lines -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-list-ul"></i>Lignes de commande <span style="margin-left:auto;font-size:.78rem;font-weight:400;color:var(--muted);">3 produits</span></div>
+          <div style="overflow-x:auto;">
+            <table class="det-table">
+              <thead>
+                <tr>
+                  <th>Réf.</th><th>Désignation</th><th>Qté</th><th>Prix unit. HT</th><th>Remise</th><th>Total HT</th><th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span style="font-family:monospace;font-size:.79rem;background:rgba(59,130,246,.08);color:var(--blue);padding:.12rem .4rem;border-radius:5px;">REF-00124</span></td>
+                  <td class="td-main">Câble HDMI 2m</td>
+                  <td>20</td>
+                  <td>4 661 BIF</td>
+                  <td>0%</td>
+                  <td style="font-weight:700;color:var(--text);">93 220 BIF</td>
+                  <td><span class="badge badge-teal">Disponible</span></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:monospace;font-size:.79rem;background:rgba(59,130,246,.08);color:var(--blue);padding:.12rem .4rem;border-radius:5px;">REF-00412</span></td>
+                  <td class="td-main">Écran LCD 24"</td>
+                  <td>2</td>
+                  <td>322 034 BIF</td>
+                  <td>5%</td>
+                  <td style="font-weight:700;color:var(--text);">610 864 BIF</td>
+                  <td><span class="badge badge-teal">Disponible</span></td>
+                </tr>
+                <tr>
+                  <td><span style="font-family:monospace;font-size:.79rem;background:rgba(59,130,246,.08);color:var(--blue);padding:.12rem .4rem;border-radius:5px;">REF-00301</span></td>
+                  <td class="td-main">Clavier sans fil</td>
+                  <td>5</td>
+                  <td>27 119 BIF</td>
+                  <td>0%</td>
+                  <td style="font-weight:700;color:var(--text);">135 593 BIF</td>
+                  <td><span class="badge badge-teal">Disponible</span></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr style="border-top:2px solid var(--border);">
+                  <td colspan="5" style="text-align:right;font-weight:600;color:var(--muted);padding:.7rem .8rem;">Sous-total HT</td>
+                  <td style="font-weight:700;color:var(--text);padding:.7rem .8rem;">839 677 BIF</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="text-align:right;font-weight:600;color:var(--muted);padding:.4rem .8rem;">Remises</td>
+                  <td style="font-weight:700;color:var(--red);padding:.4rem .8rem;">— 30 508 BIF</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="text-align:right;font-weight:600;color:var(--muted);padding:.4rem .8rem;">Base HT</td>
+                  <td style="font-weight:700;color:var(--text);padding:.4rem .8rem;">809 169 BIF</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="text-align:right;font-weight:600;color:var(--muted);padding:.4rem .8rem;">TVA (18%)</td>
+                  <td style="font-weight:700;color:var(--blue);padding:.4rem .8rem;">145 650 BIF</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td colspan="5" style="text-align:right;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;color:var(--text);padding:.7rem .8rem;">TOTAL TTC</td>
+                  <td style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--teal);padding:.7rem .8rem;">954 819 BIF</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-chat-left-text-fill"></i>Notes</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;">Note interne</div>
+              <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:.83rem;color:var(--subtle);">Commande urgente — client VIP. Livraison à prioriser avant le 15/06.</div>
+            </div>
+            <div>
+              <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;">Note pour le client</div>
+              <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.75rem;font-size:.83rem;color:var(--subtle);">Merci de votre commande. Livraison prévue le 15/06/2025.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT sidebar -->
+      <div>
+        <!-- Payment status -->
+        <div class="sec-card" style="margin-bottom:.9rem;">
+          <div class="sec-title"><i class="bi bi-credit-card-fill"></i>Paiement</div>
+          <div class="pay-row"><span class="pay-label">Total TTC</span><span class="pay-value">954 819 BIF</span></div>
+          <div class="pay-row"><span class="pay-label">Acompte reçu</span><span class="pay-value" style="color:var(--teal);">500 000 BIF</span></div>
+          <div class="pay-row pay-total"><span class="pay-label">Solde restant</span><span class="pay-value" style="color:var(--amber);">454 819 BIF</span></div>
+          <div style="margin-top:.8rem;">
+            <div style="height:7px;background:var(--border);border-radius:999px;overflow:hidden;">
+              <div style="height:100%;width:52%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:999px;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:.3rem;"><span>52% payé</span><span>48% restant</span></div>
+          </div>
+
+          <!-- Payment form toggle -->
+          <button class="btn btn-primary" style="width:100%;margin-top:.9rem;font-size:.83rem;" onclick="togglePayForm()">
+            <i class="bi bi-plus-circle"></i> Enregistrer un paiement
+          </button>
+          <div class="pay-form" id="payForm">
+            <label class="form-label">Montant (BIF)</label>
+            <input type="number" class="form-control" placeholder="454 819" id="payAmount"/>
+            <label class="form-label">Mode de paiement</label>
+            <select class="form-control" id="payMode">
+              <option>Espèces</option><option>Mobile Money (Lumicash)</option>
+              <option>Virement bancaire</option><option>Chèque</option>
+            </select>
+            <label class="form-label">Date</label>
+            <input type="date" class="form-control" id="payDate"/>
+            <label class="form-label">Notes</label>
+            <input class="form-control" placeholder="Référence, observations..." id="payNote"/>
+            <div style="display:flex;gap:.5rem;margin-top:.2rem;">
+              <button class="btn btn-ghost btn-sm" onclick="togglePayForm()">Annuler</button>
+              <button class="btn btn-primary btn-sm" onclick="savePay()"><i class="bi bi-check"></i> Valider</button>
+            </div>
+          </div>
+
+          <!-- Payment history -->
+          <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:.8rem;">
+            <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">Historique paiements</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;padding:.4rem 0;border-bottom:1px solid rgba(42,51,71,.4);">
+              <div><div style="font-weight:600;color:var(--text);">500 000 BIF</div><div style="font-size:.72rem;color:var(--muted);">Mobile Money · 08/06/2025</div></div>
+              <span class="badge badge-teal">Validé</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="sec-card" style="margin-bottom:.9rem;">
+          <div class="sec-title"><i class="bi bi-clock-history"></i>Historique</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot" style="background:var(--teal);"></div>
+              <div class="tl-title">Commande créée</div>
+              <div class="tl-meta">08/06/2025 09:30 · Admin Système</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:var(--teal);"></div>
+              <div class="tl-title">Acompte reçu (500 000 BIF)</div>
+              <div class="tl-meta">08/06/2025 10:15 · Mobile Money</div>
+              <div class="tl-note">PAY-0312</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot" style="background:var(--blue);"></div>
+              <div class="tl-title">Commande mise en cours</div>
+              <div class="tl-meta">08/06/2025 11:00 · Jean Hakizimana</div>
+            </div>
+            <div class="tl-item" style="opacity:.45;">
+              <div class="tl-dot" style="background:var(--border2);"></div>
+              <div class="tl-title" style="color:var(--muted);">Livraison (en attente)</div>
+              <div class="tl-meta">Prévue le 15/06/2025</div>
+            </div>
+            <div class="tl-item" style="opacity:.45;">
+              <div class="tl-dot" style="background:var(--border2);"></div>
+              <div class="tl-title" style="color:var(--muted);">Solde restant à encaisser</div>
+              <div class="tl-meta">454 819 BIF</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-lightning-charge-fill"></i>Actions rapides</div>
+          <div class="action-list">
+            <button class="act-item-btn" onclick="toast('Bon de livraison généré','success')"><i class="bi bi-truck"></i> Générer bon de livraison</button>
+            <button class="act-item-btn" onclick="toast('Facture générée','success')"><i class="bi bi-receipt"></i> Générer facture</button>
+            <button class="act-item-btn" onclick="window.print()"><i class="bi bi-printer"></i> Imprimer commande</button>
+            <button class="act-item-btn" onclick="sendEmail()"><i class="bi bi-envelope"></i> Envoyer par email</button>
+            <a href="nouvelle-commande.html" class="act-item-btn"><i class="bi bi-copy"></i> Dupliquer commande</a>
+            <button class="act-item-btn danger" onclick="cancelOrder()"><i class="bi bi-x-circle"></i> Annuler la commande</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="ts"></div>
+
+<script>
+function togglePayForm(){
+  const f = document.getElementById('payForm');
+  f.classList.toggle('show');
+  if(f.classList.contains('show')){
+    document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+  }
+}
+
+function savePay(){
+  const amt = document.getElementById('payAmount').value;
+  if(!amt){ toast('Entrez le montant !','error'); return; }
+  toast(`Paiement de ${Number(amt).toLocaleString('fr-FR')} BIF enregistré`,'success');
+  togglePayForm();
+}
+
+function changeStatus(s){
+  const badges={'En cours':'badge-blue','Livré':'badge-teal','Annulé':'badge-red'};
+  toast(`Statut mis à jour: ${s}`,'success');
+}
+
+function sendEmail(){ toast('Email envoyé à sopharma@sopharma.bi','success'); }
+function cancelOrder(){
+  if(confirm('Annuler la commande CMD-0127 ?')){
+    toast('Commande annulée','error');
+    setTimeout(()=>location.href='commandes.html',1500);
+  }
+}
+
+function toast(msg, type='success'){
+  const s=document.getElementById('ts');
+  const t=document.createElement('div'); t.className=`toast ${type}`;
+  const ic={success:'check-circle-fill',error:'x-circle-fill',info:'info-circle-fill'};
+  const cl={success:'var(--teal)',error:'var(--red)',info:'var(--blue)'};
+  t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
+  s.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+
+// Set today's date
+document.getElementById('payDate').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

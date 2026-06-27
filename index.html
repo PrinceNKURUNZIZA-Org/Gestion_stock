@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Index des pages</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--dark:#0a0e17;--panel:#111827;--card:#1a2233;--border:#2a3347;--teal:#10d9a0;--blue:#3b82f6;--purple:#8b5cf6;--amber:#f59e0b;--red:#ef4444;--muted:#6b7280;--text:#f1f5f9;--subtle:#cbd5e1;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;padding:2rem 1.5rem;}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px;opacity:.12;pointer-events:none;z-index:0;}
+
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;}
+
+/* Header */
+.header{text-align:center;margin-bottom:2.5rem;}
+.header .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;margin:0 auto 1rem;box-shadow:0 0 40px rgba(16,217,160,.3);}
+.header h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:2rem;margin-bottom:.4rem;}
+.header h1 span{color:var(--teal);}
+.header p{color:var(--muted);font-size:.9rem;}
+
+/* Quick access */
+.qa-bar{display:flex;gap:.6rem;justify-content:center;margin-bottom:2.5rem;flex-wrap:wrap;}
+.qa-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.2rem;border-radius:9px;font-size:.85rem;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s;border:none;font-family:'Inter',sans-serif;}
+.qa-btn.primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;}
+.qa-btn.primary:hover{opacity:.88;}
+.qa-btn.ghost{background:transparent;border:1px solid var(--border);color:var(--subtle);}
+.qa-btn.ghost:hover{border-color:var(--teal);color:var(--teal);}
+
+/* Section */
+.section{margin-bottom:2rem;}
+.section-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Page cards grid */
+.pages-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;}
+
+.page-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:12px;padding:1.1rem;
+  text-decoration:none;
+  display:flex;flex-direction:column;
+  transition:all .18s;
+  cursor:pointer;
+}
+.page-card:hover{border-color:var(--teal);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
+.page-card .pc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.75rem;flex-shrink:0;}
+.page-card .pc-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:.2rem;}
+.page-card .pc-desc{font-size:.73rem;color:var(--muted);line-height:1.35;}
+.page-card .pc-badge{display:inline-flex;align-items:center;gap:.25rem;margin-top:.6rem;font-size:.66rem;font-weight:700;padding:.14rem .5rem;border-radius:999px;}
+.page-card .pc-badge.new{background:rgba(16,217,160,.12);color:var(--teal);}
+.page-card .pc-badge.pos{background:rgba(59,130,246,.12);color:var(--blue);}
+.page-card .pc-badge.key{background:rgba(245,158,11,.12);color:var(--amber);}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.75rem;margin-bottom:2rem;}
+.stat-pill{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.7rem;}
+.stat-pill .sp-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.stat-pill .sp-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.15rem;color:var(--text);}
+.stat-pill .sp-lbl{font-size:.69rem;color:var(--muted);}
+
+/* Footer */
+.footer{text-align:center;margin-top:2.5rem;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border);padding-top:1.25rem;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo"><i class="bi bi-boxes"></i></div>
+    <h1>Stock<span>Pro</span> v2</h1>
+    <p>Système de gestion de stock complet — 20 pages, 100% fonctionnelles</p>
+  </div>
+
+  <!-- Quick access -->
+  <div class="qa-bar">
+    <a class="qa-btn primary" href="login.html"><i class="bi bi-box-arrow-in-right"></i> Connexion</a>
+    <a class="qa-btn primary" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+    <a class="qa-btn primary" href="pos.html"><i class="bi bi-cash-register"></i> Ouvrir POS</a>
+    <a class="qa-btn ghost" href="nouvelle-commande.html"><i class="bi bi-plus-circle"></i> Nouvelle commande</a>
+    <a class="qa-btn ghost" href="alertes-stock.html"><i class="bi bi-exclamation-triangle"></i> Alertes stock</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-file-earmark-code-fill"></i></div><div><div class="sp-val">20</div><div class="sp-lbl">Pages HTML</div></div></div>
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(59,130,246,.1);color:var(--blue);"><i class="bi bi-box-seam-fill"></i></div><div><div class="sp-val">1 284</div><div class="sp-lbl">Produits démo</div></div></div>
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(245,158,11,.1);color:var(--amber);"><i class="bi bi-exclamation-triangle-fill"></i></div><div><div class="sp-val">14</div><div class="sp-lbl">Alertes actives</div></div></div>
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(139,92,246,.1);color:var(--purple);"><i class="bi bi-people-fill"></i></div><div><div class="sp-val">7</div><div class="sp-lbl">Utilisateurs</div></div></div>
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(239,68,68,.1);color:var(--red);"><i class="bi bi-currency-dollar"></i></div><div><div class="sp-val">12,4M</div><div class="sp-lbl">Dettes (BIF)</div></div></div>
+    <div class="stat-pill"><div class="sp-ico" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-building"></i></div><div><div class="sp-val">6</div><div class="sp-lbl">Entrepôts</div></div></div>
+  </div>
+
+  <!-- AUTH -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-shield-lock"></i> Authentification</div>
+    <div class="pages-grid">
+      <a class="page-card" href="login.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-box-arrow-in-right"></i></div>
+        <div class="pc-name">Connexion</div>
+        <div class="pc-desc">Page de login avec accès démo rapide</div>
+        <span class="pc-badge key"><i class="bi bi-star-fill"></i> Point d'entrée</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- PRINCIPAL -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-grid-1x2-fill"></i> Principal</div>
+    <div class="pages-grid">
+      <a class="page-card" href="dashboard.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-grid-1x2-fill"></i></div>
+        <div class="pc-name">Dashboard</div>
+        <div class="pc-desc">KPIs, graphiques, alertes, activité récente</div>
+        <span class="pc-badge new"><i class="bi bi-bar-chart-fill"></i> Charts intégrés</span>
+      </a>
+      <a class="page-card" href="pos.html">
+        <div class="pc-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><i class="bi bi-cash-register"></i></div>
+        <div class="pc-name">Point de Vente</div>
+        <div class="pc-desc">POS complet avec panier, reçu et encaissement</div>
+        <span class="pc-badge pos"><i class="bi bi-lightning-fill"></i> POS Full</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- STOCK -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-archive-fill"></i> Gestion du Stock</div>
+    <div class="pages-grid">
+      <a class="page-card" href="categories.html">
+        <div class="pc-icon" style="background:rgba(245,158,11,.1);color:var(--amber);"><i class="bi bi-tags-fill"></i></div>
+        <div class="pc-name">Catégories</div>
+        <div class="pc-desc">Catégories & sous-catégories de produits</div>
+      </a>
+      <a class="page-card" href="produits.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-box-seam"></i></div>
+        <div class="pc-name">Produits</div>
+        <div class="pc-desc">Catalogue complet avec prix, stock, seuils</div>
+      </a>
+      <a class="page-card" href="stocks.html">
+        <div class="pc-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><i class="bi bi-archive-fill"></i></div>
+        <div class="pc-name">Stocks</div>
+        <div class="pc-desc">Niveaux par entrepôt, mouvements de stock</div>
+      </a>
+      <a class="page-card" href="requisitions.html">
+        <div class="pc-icon" style="background:rgba(139,92,246,.1);color:var(--purple);"><i class="bi bi-clipboard2-plus"></i></div>
+        <div class="pc-name">Réquisitions</div>
+        <div class="pc-desc">Demandes internes d'approvisionnement</div>
+      </a>
+      <a class="page-card" href="alertes-stock.html">
+        <div class="pc-icon" style="background:rgba(239,68,68,.1);color:var(--red);"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="pc-name">Alertes Stock</div>
+        <div class="pc-desc">Ruptures, stock faible, expirations proches</div>
+        <span class="pc-badge key"><i class="bi bi-bell-fill"></i> 14 alertes</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ACHATS -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-bag-plus-fill"></i> Achats Fournisseurs</div>
+    <div class="pages-grid">
+      <a class="page-card" href="fournisseurs.html">
+        <div class="pc-icon" style="background:rgba(245,158,11,.1);color:var(--amber);"><i class="bi bi-truck"></i></div>
+        <div class="pc-name">Fournisseurs</div>
+        <div class="pc-desc">Gestion des fournisseurs et soldes dus</div>
+      </a>
+      <a class="page-card" href="achats.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-bag-plus-fill"></i></div>
+        <div class="pc-name">Achats</div>
+        <div class="pc-desc">Bons de commande fournisseurs & réceptions</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- VENTES -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-cart3"></i> Ventes & Clients</div>
+    <div class="pages-grid">
+      <a class="page-card" href="clients.html">
+        <div class="pc-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><i class="bi bi-people-fill"></i></div>
+        <div class="pc-name">Clients</div>
+        <div class="pc-desc">Fiches clients avec crédits et soldes dus</div>
+      </a>
+      <a class="page-card" href="commandes.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-cart3"></i></div>
+        <div class="pc-name">Commandes</div>
+        <div class="pc-desc">Liste des commandes clients avec filtres</div>
+      </a>
+      <a class="page-card" href="nouvelle-commande.html">
+        <div class="pc-icon" style="background:rgba(139,92,246,.1);color:var(--purple);"><i class="bi bi-cart-plus-fill"></i></div>
+        <div class="pc-name">Nouvelle Commande</div>
+        <div class="pc-desc">Formulaire complet avec lignes de produits</div>
+        <span class="pc-badge new"><i class="bi bi-stars"></i> Calcul auto TTC</span>
+      </a>
+      <a class="page-card" href="detail-commande.html">
+        <div class="pc-icon" style="background:rgba(245,158,11,.1);color:var(--amber);"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <div class="pc-name">Détail Commande</div>
+        <div class="pc-desc">Fiche complète avec timeline et paiements</div>
+        <span class="pc-badge new"><i class="bi bi-printer"></i> Impression</span>
+      </a>
+      <a class="page-card" href="paiements.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-credit-card-fill"></i></div>
+        <div class="pc-name">Paiements</div>
+        <div class="pc-desc">Historique encaissements et règlements</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="section">
+    <div class="section-label"><i class="bi bi-gear-fill"></i> Administration</div>
+    <div class="pages-grid">
+      <a class="page-card" href="utilisateurs.html">
+        <div class="pc-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><i class="bi bi-person-badge-fill"></i></div>
+        <div class="pc-name">Utilisateurs</div>
+        <div class="pc-desc">Gestion des comptes et accès utilisateurs</div>
+      </a>
+      <a class="page-card" href="groupes.html">
+        <div class="pc-icon" style="background:rgba(139,92,246,.1);color:var(--purple);"><i class="bi bi-shield-lock-fill"></i></div>
+        <div class="pc-name">Groupes & Droits</div>
+        <div class="pc-desc">Matrice de permissions par groupe</div>
+        <span class="pc-badge new"><i class="bi bi-toggle-on"></i> Toggles live</span>
+      </a>
+      <a class="page-card" href="permissions.html">
+        <div class="pc-icon" style="background:rgba(245,158,11,.1);color:var(--amber);"><i class="bi bi-key-fill"></i></div>
+        <div class="pc-name">Permissions</div>
+        <div class="pc-desc">Catalogue des droits d'accès par module</div>
+      </a>
+      <a class="page-card" href="entreprise.html">
+        <div class="pc-icon" style="background:rgba(16,217,160,.1);color:var(--teal);"><i class="bi bi-building-gear"></i></div>
+        <div class="pc-name">Entreprise</div>
+        <div class="pc-desc">8 onglets de paramètres complets</div>
+        <span class="pc-badge key"><i class="bi bi-gear-fill"></i> Paramètres</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Tech info -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.3rem;margin-bottom:1.5rem;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.9rem;display:flex;align-items:center;gap:.4rem;">
+      <i class="bi bi-code-slash" style="color:var(--teal);"></i> Stack technique
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.6rem;">
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-filetype-html" style="color:var(--amber);margin-right:.3rem;"></i>HTML5 + CSS3</div>
+        <div style="color:var(--muted);">Pages statiques standalone</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-filetype-js" style="color:var(--amber);margin-right:.3rem;"></i>Vanilla JavaScript</div>
+        <div style="color:var(--muted);">CRUD complet, modals, filtres</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-bootstrap" style="color:var(--purple);margin-right:.3rem;"></i>Bootstrap Icons</div>
+        <div style="color:var(--muted);">1800+ icônes via CDN</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-bar-chart-fill" style="color:var(--teal);margin-right:.3rem;"></i>Chart.js 4.4</div>
+        <div style="color:var(--muted);">Graphiques sur le dashboard</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-google" style="color:var(--blue);margin-right:.3rem;"></i>Google Fonts</div>
+        <div style="color:var(--muted);">Space Grotesk + Inter</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;font-size:.8rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.15rem;"><i class="bi bi-palette-fill" style="color:var(--teal);margin-right:.3rem;"></i>Design System</div>
+        <div style="color:var(--muted);">_shared.css centralisé</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo credentials -->
+  <div style="background:rgba(16,217,160,.06);border:1px solid rgba(16,217,160,.2);border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
+    <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:var(--teal);margin-bottom:.75rem;"><i class="bi bi-key-fill"></i> Identifiants de démonstration</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-size:.82rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.2rem;"><i class="bi bi-shield-fill-check" style="color:var(--teal);margin-right:.3rem;"></i>Admin</div>
+        <div style="color:var(--muted);">admin@demo.com</div>
+        <div style="color:var(--muted);">Admin123!</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-size:.82rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.2rem;"><i class="bi bi-cash-register" style="color:var(--blue);margin-right:.3rem;"></i>Caissier</div>
+        <div style="color:var(--muted);">caisse@demo.com</div>
+        <div style="color:var(--muted);">Caisse1!</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-size:.82rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.2rem;"><i class="bi bi-person-badge" style="color:var(--purple);margin-right:.3rem;"></i>Magasinier</div>
+        <div style="color:var(--muted);">mag@demo.com</div>
+        <div style="color:var(--muted);">Mag123!</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-size:.82rem;">
+        <div style="font-weight:700;color:var(--text);margin-bottom:.2rem;"><i class="bi bi-bag-plus" style="color:var(--amber);margin-right:.3rem;"></i>Acheteur</div>
+        <div style="color:var(--muted);">achat@demo.com</div>
+        <div style="color:var(--muted);">Achat1!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2025 StockPro — Système de gestion de stock · 20 pages · Burundi
+    <div style="margin-top:.5rem;">
+      <a href="login.html" style="color:var(--teal);text-decoration:none;margin:0 .5rem;">Connexion</a>·
+      <a href="dashboard.html" style="color:var(--teal);text-decoration:none;margin:0 .5rem;">Dashboard</a>·
+      <a href="pos.html" style="color:var(--teal);text-decoration:none;margin:0 .5rem;">POS</a>·
+      <a href="entreprise.html" style="color:var(--teal);text-decoration:none;margin:0 .5rem;">Paramètres</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

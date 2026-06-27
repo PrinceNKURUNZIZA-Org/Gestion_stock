@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.9rem;margin-bottom:1.3rem;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;position:relative;overflow:hidden;transition:border-color .2s,transform .15s;}
+.kpi:hover{border-color:var(--border2);transform:translateY(-2px);}
+.kpi .accent{position:absolute;right:-12px;bottom:-12px;font-size:3.5rem;opacity:.055;}
+.kpi .k-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.7rem;}
+.kpi .k-label{font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.25rem;}
+.kpi .k-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.55rem;color:var(--text);line-height:1;margin-bottom:.3rem;}
+.kpi .k-delta{font-size:.73rem;display:flex;align-items:center;gap:.3rem;}
+.up{color:var(--teal);}.dn{color:var(--red);}
+.kpi .k-icon.t{background:rgba(16,217,160,.1);color:var(--teal);}
+.kpi .k-icon.b{background:rgba(59,130,246,.1);color:var(--blue);}
+.kpi .k-icon.p{background:rgba(139,92,246,.1);color:var(--purple);}
+.kpi .k-icon.a{background:rgba(245,158,11,.1);color:var(--amber);}
+.kpi .k-icon.r{background:rgba(239,68,68,.1);color:var(--red);}
+.kpi .k-icon.g{background:rgba(34,197,94,.1);color:var(--green);}
+
+/* Charts row */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 320px;gap:.9rem;margin-bottom:.9rem;}
+@media(max-width:1200px){.charts-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:800px){.charts-row{grid-template-columns:1fr;}}
+
+/* Alert banner */
+.alert-banner{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:9px;margin-bottom:.9rem;font-size:.84rem;}
+.alert-banner.red{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:var(--red);}
+.alert-banner.amber{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:var(--amber);}
+
+/* Recent activity */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:.9rem;}
+@media(max-width:1000px){.two-col{grid-template-columns:1fr;}}
+
+.act-item{display:flex;align-items:flex-start;gap:.8rem;padding:.65rem 0;border-bottom:1px solid rgba(42,51,71,.5);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+.act-dot.t{background:rgba(16,217,160,.1);color:var(--teal);}
+.act-dot.b{background:rgba(59,130,246,.1);color:var(--blue);}
+.act-dot.r{background:rgba(239,68,68,.1);color:var(--red);}
+.act-dot.a{background:rgba(245,158,11,.1);color:var(--amber);}
+.act-dot.p{background:rgba(139,92,246,.1);color:var(--purple);}
+.act-title{font-size:.83rem;color:var(--text);font-weight:500;margin-bottom:.12rem;}
+.act-meta{font-size:.73rem;color:var(--muted);}
+
+/* Stock expiry */
+.exp-item{display:flex;align-items:center;justify-content:space-between;padding:.55rem .7rem;border-radius:7px;margin-bottom:.4rem;}
+.exp-item.critical{background:rgba(239,68,68,.06);}
+.exp-item.warn{background:rgba(245,158,11,.06);}
+.exp-name{font-size:.82rem;color:var(--text);font-weight:500;}
+.exp-date{font-size:.74rem;font-weight:600;}
+
+/* Debts card */
+.debt-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid rgba(42,51,71,.5);}
+.debt-row:last-child{border-bottom:none;}
+.debt-name{font-size:.83rem;color:var(--text);font-weight:500;}
+.debt-amt{font-size:.88rem;font-weight:700;}
+
+/* Top products */
+.top-prod-bar{margin-bottom:.6rem;}
+.tp-head{display:flex;justify-content:space-between;margin-bottom:.3rem;}
+.tp-name{font-size:.8rem;color:var(--subtle);}
+.tp-val{font-size:.8rem;font-weight:600;color:var(--text);}
+.bar-track{height:5px;background:var(--border);border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:999px;}
+
+canvas{max-width:100%;display:block;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html">
+    <div class="logo-box"><i class="bi bi-boxes"></i></div>
+    <span class="brand-text">Stock<span>Pro</span></span>
+  </a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link active" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Tableau de bord</span>
+    <div class="search-box"><i class="bi bi-search"></i><input placeholder="Recherche rapide..."/></div>
+    <div class="tb-btn" title="Notifications"><i class="bi bi-bell"></i><span class="notif-dot"></span></div>
+    <div class="tb-btn" title="Paramètres" onclick="location.href='entreprise.html'"><i class="bi bi-gear"></i></div>
+  </div>
+
+  <div class="page-content">
+    <!-- Welcome -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:1.2rem;">
+      <div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.4rem;color:var(--text);">Bonjour, Admin 👋</h2>
+        <p style="font-size:.83rem;color:var(--muted);margin-top:.2rem;" id="today-lbl"></p>
+      </div>
+      <div style="display:flex;gap:.6rem;">
+        <a class="btn btn-ghost" href="stocks.html"><i class="bi bi-arrow-left-right"></i> Mouvement</a>
+        <a class="btn btn-primary" href="pos.html"><i class="bi bi-cash-register"></i> Ouvrir POS</a>
+        <a class="btn btn-primary" href="nouvelle-commande.html"><i class="bi bi-plus-lg"></i> Commande</a>
+      </div>
+    </div>
+
+    <!-- Alert banners -->
+    <div class="alert-banner red"><i class="bi bi-exclamation-octagon-fill"></i><b>4 produits en rupture de stock</b> — Action immédiate requise. <a href="alertes-stock.html" style="color:var(--red);margin-left:auto;font-weight:600;text-decoration:none;">Voir les alertes →</a></div>
+    <div class="alert-banner amber"><i class="bi bi-clock-fill"></i><b>6 produits expirent dans moins de 30 jours.</b> <a href="#exp-section" style="color:var(--amber);margin-left:auto;font-weight:600;text-decoration:none;">Voir →</a></div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="k-icon t"><i class="bi bi-box-seam-fill"></i></div>
+        <div class="k-label">Produits en stock</div>
+        <div class="k-val" data-count="1284">0</div>
+        <div class="k-delta up"><i class="bi bi-arrow-up-short"></i>+48 ce mois</div>
+        <i class="bi bi-box-seam accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon g"><i class="bi bi-currency-dollar"></i></div>
+        <div class="k-label">Valeur du stock</div>
+        <div class="k-val" style="font-size:1.2rem;">284,6M BIF</div>
+        <div class="k-delta up"><i class="bi bi-arrow-up-short"></i>+12.4% vs mois passé</div>
+        <i class="bi bi-cash-stack accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon r"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div class="k-label">Produits expirés</div>
+        <div class="k-val" style="color:var(--red);" data-count="8">0</div>
+        <div class="k-delta dn"><i class="bi bi-arrow-up-short"></i>+2 cette semaine</div>
+        <i class="bi bi-x-circle accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon a"><i class="bi bi-hourglass-split"></i></div>
+        <div class="k-label">Stock faible</div>
+        <div class="k-val" style="color:var(--amber);" data-count="14">0</div>
+        <div class="k-delta dn"><i class="bi bi-arrow-up-short"></i>4 critiques</div>
+        <i class="bi bi-exclamation-circle accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon b"><i class="bi bi-cart-check-fill"></i></div>
+        <div class="k-label">Commandes (mois)</div>
+        <div class="k-val" data-count="127">0</div>
+        <div class="k-delta up"><i class="bi bi-arrow-up-short"></i>+18 vs mois passé</div>
+        <i class="bi bi-cart3 accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon t"><i class="bi bi-cash-coin"></i></div>
+        <div class="k-label">CA (mois)</div>
+        <div class="k-val" style="font-size:1.15rem;">48,2M BIF</div>
+        <div class="k-delta up"><i class="bi bi-arrow-up-short"></i>+8.2%</div>
+        <i class="bi bi-bar-chart accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon r"><i class="bi bi-people-fill"></i></div>
+        <div class="k-label">Dettes clients</div>
+        <div class="k-val" style="font-size:1.15rem;color:var(--red);">12,4M BIF</div>
+        <div class="k-delta dn"><i class="bi bi-arrow-up-short"></i>7 clients</div>
+        <i class="bi bi-credit-card accent"></i>
+      </div>
+      <div class="kpi">
+        <div class="k-icon p"><i class="bi bi-truck"></i></div>
+        <div class="k-label">Dettes fournisseurs</div>
+        <div class="k-val" style="font-size:1.15rem;color:var(--purple);">8,7M BIF</div>
+        <div class="k-delta dn"><i class="bi bi-arrow-up-short"></i>3 fournisseurs</div>
+        <i class="bi bi-truck accent"></i>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+      <div class="card">
+        <div class="card-header"><h4><i class="bi bi-bar-chart-fill" style="color:var(--teal);margin-right:.4rem;"></i>Ventes & Achats — 6 mois</h4>
+          <select class="filter-select" style="font-size:.75rem;"><option>2025</option><option>2024</option></select>
+        </div>
+        <canvas id="chartVentes" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><h4><i class="bi bi-pie-chart-fill" style="color:var(--blue);margin-right:.4rem;"></i>Stock par catégorie</h4></div>
+        <canvas id="chartCat" height="200"></canvas>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:.0rem;">
+        <div class="card-header" style="margin-bottom:.6rem;"><h4><i class="bi bi-graph-up-arrow" style="color:var(--amber);margin-right:.4rem;"></i>Top 5 produits vendus</h4></div>
+        <div id="topProds"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="two-col">
+      <!-- Recent orders -->
+      <div class="card">
+        <div class="card-header">
+          <h4><i class="bi bi-clock-history" style="color:var(--blue);margin-right:.4rem;"></i>Activité récente</h4>
+          <a href="commandes.html" class="btn btn-ghost btn-sm">Voir tout</a>
+        </div>
+        <div id="activityFeed"></div>
+      </div>
+
+      <!-- Right column: expiry + debts -->
+      <div style="display:flex;flex-direction:column;gap:.9rem;">
+        <!-- Expiry -->
+        <div class="card" id="exp-section">
+          <div class="card-header"><h4><i class="bi bi-calendar-x-fill" style="color:var(--red);margin-right:.4rem;"></i>Produits proches expiration</h4><a href="alertes-stock.html" class="btn btn-ghost btn-sm">Voir</a></div>
+          <div class="exp-item critical"><div><div class="exp-name">Sérum physiologique 500ml</div><div style="font-size:.72rem;color:var(--muted);">Stock: 48 unités</div></div><div class="exp-date" style="color:var(--red);">Exp. 15/06/25</div></div>
+          <div class="exp-item critical"><div><div class="exp-name">Gel antiseptique 1L</div><div style="font-size:.72rem;color:var(--muted);">Stock: 12 unités</div></div><div class="exp-date" style="color:var(--red);">Exp. 20/06/25</div></div>
+          <div class="exp-item warn"><div><div class="exp-name">Lait en poudre 2kg</div><div style="font-size:.72rem;color:var(--muted);">Stock: 24 unités</div></div><div class="exp-date" style="color:var(--amber);">Exp. 05/07/25</div></div>
+          <div class="exp-item warn"><div><div class="exp-name">Biscuits LU 250g</div><div style="font-size:.72rem;color:var(--muted);">Stock: 60 boîtes</div></div><div class="exp-date" style="color:var(--amber);">Exp. 10/07/25</div></div>
+        </div>
+
+        <!-- Debts -->
+        <div class="card">
+          <div class="card-header"><h4><i class="bi bi-exclamation-circle-fill" style="color:var(--amber);margin-right:.4rem;"></i>Dettes clients (top)</h4><a href="clients.html" class="btn btn-ghost btn-sm">Gérer</a></div>
+          <div class="debt-row"><div class="debt-name">SOPHARMA SARL</div><div class="debt-amt" style="color:var(--red);">3,2M BIF</div></div>
+          <div class="debt-row"><div class="debt-name">HOREB COMMERCE</div><div class="debt-amt" style="color:var(--red);">2,8M BIF</div></div>
+          <div class="debt-row"><div class="debt-name">Jean Nkurunziza</div><div class="debt-amt" style="color:var(--amber);">1,1M BIF</div></div>
+          <div class="debt-row"><div class="debt-name">Marie Kabura</div><div class="debt-amt" style="color:var(--amber);">850K BIF</div></div>
+          <div style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:.82rem;">
+            <span style="color:var(--muted);">Total dettes</span>
+            <span style="font-weight:700;color:var(--red);">12,4M BIF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="ts"></div>
+
+<script>
+// Date
+document.getElementById('today-lbl').textContent = 'Aujourd\'hui, ' + new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Count-up
+document.querySelectorAll('[data-count]').forEach(el=>{
+  const t=+el.dataset.count; let c=0;
+  const iv=setInterval(()=>{c=Math.min(c+Math.ceil(t/40),t);el.textContent=c.toLocaleString('fr-FR');if(c>=t)clearInterval(iv);},30);
+});
+
+// Chart ventes
+const ctx1=document.getElementById('chartVentes').getContext('2d');
+new Chart(ctx1,{type:'bar',data:{labels:['Jan','Fév','Mar','Avr','Mai','Jun'],datasets:[
+  {label:'Ventes',data:[38,45,42,58,54,68],backgroundColor:'rgba(16,217,160,.75)',borderRadius:5},
+  {label:'Achats',data:[30,38,34,46,44,52],backgroundColor:'rgba(59,130,246,.6)',borderRadius:5}
+]},options:{responsive:true,plugins:{legend:{labels:{color:'#6b7280',font:{size:11}}}},scales:{x:{grid:{color:'rgba(42,51,71,.6)'},ticks:{color:'#6b7280'}},y:{grid:{color:'rgba(42,51,71,.6)'},ticks:{color:'#6b7280',callback:v=>v+'M'}}}}});
+
+// Chart cat
+const ctx2=document.getElementById('chartCat').getContext('2d');
+new Chart(ctx2,{type:'doughnut',data:{labels:['Informatique','Alimentaire','Pharmacie','Fournitures','Autre'],
+  datasets:[{data:[28,22,18,16,16],backgroundColor:['#10d9a0','#3b82f6','#8b5cf6','#f59e0b','#ef4444'],borderWidth:0,hoverOffset:5}]},
+  options:{responsive:true,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:'#6b7280',font:{size:11},padding:10}}}}});
+
+// Top products
+const tops=[{n:'Câble HDMI 2m',v:142,pct:100},{n:'Papier A4 rame',v:98,pct:69},{n:'Clavier sans fil',v:87,pct:61},{n:'Stylos bille (bte)',v:72,pct:51},{n:'Écran LCD 24"',v:55,pct:39}];
+const COLS=['#10d9a0','#3b82f6','#8b5cf6','#f59e0b','#ef4444'];
+document.getElementById('topProds').innerHTML=tops.map((t,i)=>`
+<div class="top-prod-bar">
+  <div class="tp-head"><span class="tp-name">${t.n}</span><span class="tp-val">${t.v} ventes</span></div>
+  <div class="bar-track"><div class="bar-fill" style="width:${t.pct}%;background:${COLS[i]};"></div></div>
+</div>`).join('');
+
+// Activity
+const acts=[
+  {ic:'arrow-down-circle-fill',cls:'t',title:'Réception CMD-0091 — 50 unités HDMI',meta:'il y a 23 min · Entrepôt A · Jean H.'},
+  {ic:'cart-check-fill',cls:'b',title:'Commande #CMD-0127 créée — 3 lignes',meta:'il y a 1h · Client: SOPHARMA'},
+  {ic:'cash-coin',cls:'g',title:'Paiement reçu 1 200 000 BIF',meta:'il y a 2h · HOREB COMMERCE'},
+  {ic:'exclamation-triangle-fill',cls:'r',title:'Alerte: Câble RJ45 Cat6 — stock critique (3 unités)',meta:'il y a 3h · Entrepôt A'},
+  {ic:'person-plus-fill',cls:'p',title:'Nouvel utilisateur: Claude Nkurunziza',meta:'hier · Rôle: Magasinier'},
+  {ic:'clipboard-check-fill',cls:'b',title:'Inventaire INV-2025-06 validé — 68% complété',meta:'hier · Admin Système'},
+];
+const GMAP={t:'var(--teal)',b:'var(--blue)',g:'var(--green)',r:'var(--red)',p:'var(--purple)',a:'var(--amber)'};
+document.getElementById('activityFeed').innerHTML=acts.map(a=>`
+<div class="act-item">
+  <div class="act-dot ${a.cls}"><i class="bi bi-${a.ic}"></i></div>
+  <div><div class="act-title">${a.title}</div><div class="act-meta">${a.meta}</div></div>
+</div>`).join('');
+
+// Toast welcome
+setTimeout(()=>{
+  const t=document.createElement('div');
+  t.className='toast success';
+  t.innerHTML='<i class="bi bi-check-circle-fill" style="color:var(--teal);"></i> Bienvenue sur StockPro !';
+  document.getElementById('ts').appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+},600);
+</script>
+</body>
+</html>

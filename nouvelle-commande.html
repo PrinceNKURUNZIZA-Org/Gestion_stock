@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro – Nouvelle Commande</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+.order-layout { display:grid; grid-template-columns:1fr 340px; gap:1.2rem; align-items:start; }
+@media(max-width:1000px){ .order-layout { grid-template-columns:1fr; } }
+
+/* SECTION CARD */
+.sec-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem; margin-bottom:1rem; }
+.sec-title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.9rem; color:var(--text); margin-bottom:1.1rem; display:flex; align-items:center; gap:.5rem; }
+.sec-title i { color:var(--teal); font-size:1rem; }
+
+/* STEPS indicator */
+.steps-bar { display:flex; align-items:center; gap:0; margin-bottom:1.5rem; }
+.step-item { display:flex; align-items:center; gap:.4rem; flex:1; }
+.step-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; flex-shrink:0; }
+.step-num.done { background:var(--teal); color:#0a0e17; }
+.step-num.active { background:var(--blue); color:#fff; }
+.step-num.pending { background:var(--border2); color:var(--muted); }
+.step-label { font-size:.75rem; font-weight:600; color:var(--muted); }
+.step-label.active { color:var(--text); }
+.step-sep { flex:1; height:2px; background:var(--border); margin:0 .5rem; }
+.step-sep.done { background:var(--teal); }
+
+/* PRODUCT LINE TABLE */
+.lines-table { width:100%; border-collapse:collapse; }
+.lines-table th { padding:.5rem .7rem; font-size:.65rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; text-align:left; border-bottom:1px solid var(--border); }
+.lines-table td { padding:.55rem .7rem; vertical-align:middle; border-bottom:1px solid rgba(42,51,71,.4); }
+.lines-table tr:last-child td { border-bottom:none; }
+.line-input { width:100%; padding:.4rem .6rem; background:var(--panel); border:1px solid var(--border); border-radius:7px; color:var(--text); font-size:.84rem; outline:none; }
+.line-input:focus { border-color:var(--teal); }
+.line-select { appearance:none; cursor:pointer; }
+.line-del { width:26px; height:26px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.8rem; transition:all .15s; }
+.line-del:hover { border-color:var(--red); color:var(--red); }
+.add-line-btn { display:flex; align-items:center; gap:.4rem; padding:.5rem .8rem; border-radius:7px; border:1px dashed var(--border2); background:transparent; color:var(--muted); font-size:.82rem; cursor:pointer; transition:all .15s; margin-top:.6rem; width:100%; justify-content:center; }
+.add-line-btn:hover { border-color:var(--teal); color:var(--teal); }
+.line-total { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.88rem; color:var(--teal); }
+
+/* SUMMARY CARD */
+.sum-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:1.2rem; position:sticky; top:80px; }
+.sum-row { display:flex; justify-content:space-between; align-items:center; padding:.45rem 0; border-bottom:1px solid rgba(42,51,71,.5); font-size:.83rem; }
+.sum-row:last-child { border-bottom:none; }
+.sum-label { color:var(--muted); }
+.sum-value { font-weight:600; color:var(--text); }
+.sum-total { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem; }
+.sum-total .sum-value { color:var(--teal); font-size:1.2rem; }
+
+.form-control { width:100%; padding:.6rem .85rem; background:var(--panel); border:1.5px solid var(--border); border-radius:8px; color:var(--text); font-size:.875rem; outline:none; transition:border-color .2s,box-shadow .2s; font-family:'Inter',sans-serif; }
+.form-control:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(16,217,160,.1); }
+.form-control::placeholder { color:var(--muted); }
+select.form-control { appearance:none; cursor:pointer; }
+.form-label { display:block; font-size:.7rem; font-weight:700; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; margin-bottom:.38rem; }
+.form-group { margin-bottom:.95rem; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+.form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem; }
+@media(max-width:600px){ .form-row-2,.form-row-3 { grid-template-columns:1fr; } }
+
+/* Badges */
+.badge { display:inline-flex; align-items:center; gap:.3rem; padding:.18rem .6rem; border-radius:999px; font-size:.69rem; font-weight:700; }
+.badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.badge-teal { background:rgba(16,217,160,.1); color:var(--teal); }
+.badge-amber { background:rgba(245,158,11,.1); color:var(--amber); }
+.badge-red { background:rgba(239,68,68,.1); color:var(--red); }
+
+/* Status selector */
+.status-opts { display:flex; gap:.5rem; flex-wrap:wrap; }
+.status-opt { padding:.38rem .9rem; border-radius:999px; border:1.5px solid var(--border); background:transparent; color:var(--muted); font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; }
+.status-opt:hover { border-color:var(--teal); color:var(--teal); }
+.status-opt.sel { border-color:var(--teal); background:rgba(16,217,160,.1); color:var(--teal); }
+
+/* Toast */
+.toast-stack { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:.4rem; }
+.toast { background:var(--card); border:1px solid var(--border2); border-radius:10px; padding:.7rem 1rem; display:flex; align-items:center; gap:.6rem; font-size:.82rem; color:var(--text); min-width:240px; box-shadow:0 8px 24px rgba(0,0,0,.4); animation:toastIn .25s ease; }
+.toast.success { border-left:3px solid var(--teal); }
+.toast.error { border-left:3px solid var(--red); }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);} }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html"><div class="logo-box"><i class="bi bi-boxes"></i></div><span class="brand-text">Stock<span>Pro</span></span></a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Catégories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Réquisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link active" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Nouvelle Commande</span>
+    <div style="display:flex;gap:.6rem;margin-left:auto;">
+      <a class="btn btn-ghost btn-sm" href="commandes.html"><i class="bi bi-arrow-left"></i> Retour</a>
+      <button class="btn btn-ghost btn-sm" onclick="saveDraft()"><i class="bi bi-floppy"></i> Brouillon</button>
+      <button class="btn btn-primary btn-sm" onclick="submitOrder()"><i class="bi bi-check-circle"></i> Confirmer commande</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <a href="commandes.html">Commandes</a><span class="sep"><i class="bi bi-chevron-right"></i></span>
+      <span class="cur">Nouvelle commande</span>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps-bar">
+      <div class="step-item">
+        <div class="step-num active">1</div>
+        <span class="step-label active">Informations</span>
+      </div>
+      <div class="step-sep done"></div>
+      <div class="step-item">
+        <div class="step-num active">2</div>
+        <span class="step-label active">Produits</span>
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item">
+        <div class="step-num pending">3</div>
+        <span class="step-label">Paiement</span>
+      </div>
+      <div class="step-sep"></div>
+      <div class="step-item">
+        <div class="step-num pending">4</div>
+        <span class="step-label">Confirmation</span>
+      </div>
+    </div>
+
+    <div class="order-layout">
+      <!-- LEFT -->
+      <div>
+        <!-- CLIENT INFO -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-person-fill"></i>Informations client</div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Client *</label>
+              <select class="form-control" id="ordClient" onchange="updateClient()">
+                <option value="">— Sélectionner un client —</option>
+                <option value="CLI-001" data-tel="+257 22 30 11 22" data-email="sopharma@sopharma.bi" data-addr="Zone Commerciale, Bujumbura">SOPHARMA SARL</option>
+                <option value="CLI-002" data-tel="+257 22 31 44 55" data-email="horeb@horeb.bi" data-addr="Quartier Nyakabiga">HOREB COMMERCE</option>
+                <option value="CLI-003" data-tel="+257 79 11 22 33" data-email="jean.nk@gmail.com" data-addr="Rohero, Bujumbura">Jean Nkurunziza</option>
+                <option value="CLI-004" data-tel="+257 79 44 55 66" data-email="m.kabura@yahoo.fr" data-addr="Kiyange, Bujumbura">Marie Kabura</option>
+                <option value="CLI-005" data-tel="+257 22 22 00 00" data-email="mairie@mairie.bi" data-addr="Hôtel de Ville, Centre">MAIRIE DE BUJUMBURA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Numéro de commande</label>
+              <input class="form-control" id="ordNum" value="CMD-0128" readonly style="opacity:.6;"/>
+            </div>
+          </div>
+          <div class="form-row-3" id="clientDetails" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Téléphone</label>
+              <input class="form-control" id="cliTel" readonly style="opacity:.7;"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-control" id="cliEmail" readonly style="opacity:.7;"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Adresse</label>
+              <input class="form-control" id="cliAddr" readonly style="opacity:.7;"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- DATES & DELIVERY -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-calendar3"></i>Dates & Livraison</div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">Date de commande *</label>
+              <input type="date" class="form-control" id="ordDate"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date livraison prévue</label>
+              <input type="date" class="form-control" id="ordLivraison"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mode de livraison</label>
+              <select class="form-control" id="ordLivMode">
+                <option>Livraison à domicile</option>
+                <option>Retrait en magasin</option>
+                <option>Express (24h)</option>
+                <option>Coursier</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Adresse de livraison</label>
+            <input class="form-control" id="ordAddrLiv" placeholder="Adresse de livraison si différente..."/>
+          </div>
+        </div>
+
+        <!-- PRODUCT LINES -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-box-seam"></i>Lignes de produits</div>
+          <div class="table-wrapper" style="overflow-x:auto;">
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th style="min-width:200px;">Produit</th>
+                  <th style="min-width:70px;">Qté</th>
+                  <th style="min-width:110px;">Prix unit. (BIF)</th>
+                  <th style="min-width:60px;">Remise %</th>
+                  <th style="min-width:120px;">Total ligne</th>
+                  <th style="width:40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="linesBody"></tbody>
+            </table>
+          </div>
+          <button class="add-line-btn" onclick="addLine()"><i class="bi bi-plus-lg"></i> Ajouter une ligne</button>
+        </div>
+
+        <!-- CONDITIONS & NOTES -->
+        <div class="sec-card">
+          <div class="sec-title"><i class="bi bi-file-text"></i>Conditions & Notes</div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Conditions de paiement</label>
+              <select class="form-control" id="ordCondPay" onchange="updateSummary()">
+                <option value="comptant">Comptant</option>
+                <option value="30j">30 jours</option>
+                <option value="60j">60 jours</option>
+                <option value="90j">90 jours</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vendeur / Commercial</label>
+              <select class="form-control">
+                <option>Admin Système</option>
+                <option>Jean Hakizimana</option>
+                <option>Marie Niyonzima</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Statut commande</label>
+            <div class="status-opts">
+              <button class="status-opt sel" onclick="selStatus(this,'En attente')">En attente</button>
+              <button class="status-opt" onclick="selStatus(this,'En cours')">En cours</button>
+              <button class="status-opt" onclick="selStatus(this,'Confirmée')">Confirmée</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes internes</label>
+            <textarea class="form-control" id="ordNotes" rows="3" placeholder="Remarques, instructions spéciales..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes pour le client</label>
+            <textarea class="form-control" id="ordNotesClient" rows="2" placeholder="Message qui apparaîtra sur le bon de commande..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SUMMARY -->
+      <div>
+        <div class="sum-card">
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:.4rem;">
+            <i class="bi bi-receipt" style="color:var(--teal);"></i> Récapitulatif
+          </div>
+
+          <!-- Client mini -->
+          <div id="sumClient" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.75rem;margin-bottom:.9rem;font-size:.82rem;color:var(--muted);text-align:center;">
+            <i class="bi bi-person-circle" style="font-size:1.5rem;display:block;margin-bottom:.3rem;"></i>
+            Aucun client sélectionné
+          </div>
+
+          <div class="sum-row"><span class="sum-label">Lignes produits</span><span class="sum-value" id="sumLines">0</span></div>
+          <div class="sum-row"><span class="sum-label">Quantité totale</span><span class="sum-value" id="sumQty">0</span></div>
+          <div class="sum-row"><span class="sum-label">Sous-total HT</span><span class="sum-value" id="sumHT">0 BIF</span></div>
+          <div class="sum-row"><span class="sum-label">Remises</span><span class="sum-value" style="color:var(--red);" id="sumDiscount">— 0 BIF</span></div>
+          <div class="sum-row"><span class="sum-label">Base imposable</span><span class="sum-value" id="sumBase">0 BIF</span></div>
+          <div class="sum-row"><span class="sum-label">TVA (18%)</span><span class="sum-value" id="sumTVA">0 BIF</span></div>
+          <div class="sum-row sum-total" style="margin-top:.5rem;"><span class="sum-label">TOTAL TTC</span><span class="sum-value" id="sumTTC">0 BIF</span></div>
+
+          <div style="height:1px;background:var(--border);margin:.9rem 0;"></div>
+
+          <!-- Paiement -->
+          <div class="form-group">
+            <label class="form-label">Acompte reçu (BIF)</label>
+            <input type="number" class="form-control" id="acompte" placeholder="0" oninput="updateSummary()"/>
+          </div>
+          <div class="sum-row" style="font-weight:700;">
+            <span class="sum-label">Solde restant</span>
+            <span class="sum-value" style="color:var(--amber);" id="sumSolde">0 BIF</span>
+          </div>
+
+          <div style="height:1px;background:var(--border);margin:.9rem 0;"></div>
+
+          <!-- Conditions -->
+          <div style="font-size:.75rem;color:var(--muted);">
+            <div style="display:flex;justify-content:space-between;margin-bottom:.3rem;">
+              <span>Conditions paiement</span>
+              <span id="sumCond" style="color:var(--text);font-weight:600;">Comptant</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span>Echeance estimée</span>
+              <span id="sumEch" style="color:var(--text);font-weight:600;">Aujourd'hui</span>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.5rem;">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitOrder()">
+              <i class="bi bi-check-circle-fill"></i> Confirmer la commande
+            </button>
+            <button class="btn btn-ghost" style="width:100%;" onclick="saveDraft()">
+              <i class="bi bi-floppy"></i> Enregistrer brouillon
+            </button>
+            <button class="btn btn-ghost" style="width:100%;font-size:.78rem;" onclick="printOrder()">
+              <i class="bi bi-printer"></i> Imprimer bon de commande
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="ts"></div>
+
+<script>
+const PRODUCTS = [
+  {ref:'REF-00124',name:'Câble HDMI 2m',price:5500,stock:142},
+  {ref:'REF-00089',name:'Imprimante thermique 80mm',price:120000,stock:1},
+  {ref:'REF-00211',name:'Papier A4 80g (rame)',price:6000,stock:8},
+  {ref:'REF-00345',name:'Chaise ergonomique',price:180000,stock:34},
+  {ref:'REF-00067',name:'Câble RJ45 Cat6 (100m)',price:38000,stock:3},
+  {ref:'REF-00198',name:'Stylos bille bleu (bte)',price:4500,stock:12},
+  {ref:'REF-00412',name:'Écran LCD 24"',price:380000,stock:18},
+  {ref:'REF-00512',name:'Table de réunion 8 places',price:900000,stock:4},
+  {ref:'REF-00274',name:'Agrafe Rapid 23/6 (bte)',price:2000,stock:5},
+  {ref:'REF-00301',name:'Clavier sans fil',price:32000,stock:55},
+  {ref:'REF-00601',name:'Sérum physiologique 500ml',price:3800,stock:48},
+  {ref:'REF-00714',name:'Gel antiseptique 1L',price:6000,stock:12},
+];
+
+let lineCount = 0;
+let orderStatus = 'En attente';
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.getElementById('ordDate').value = new Date().toISOString().split('T')[0];
+const livDate = new Date(); livDate.setDate(livDate.getDate()+7);
+document.getElementById('ordLivraison').value = livDate.toISOString().split('T')[0];
+addLine(); addLine(); // start with 2 lines
+
+// ── CLIENT ────────────────────────────────────────────────────────
+function updateClient(){
+  const sel = document.getElementById('ordClient');
+  const opt = sel.options[sel.selectedIndex];
+  if(!opt.value){ document.getElementById('clientDetails').style.display='none'; document.getElementById('sumClient').innerHTML='<i class="bi bi-person-circle" style="font-size:1.5rem;display:block;margin-bottom:.3rem;"></i>Aucun client sélectionné'; return; }
+  document.getElementById('cliTel').value = opt.dataset.tel||'';
+  document.getElementById('cliEmail').value = opt.dataset.email||'';
+  document.getElementById('cliAddr').value = opt.dataset.addr||'';
+  document.getElementById('clientDetails').style.display='grid';
+  document.getElementById('sumClient').innerHTML=`<i class="bi bi-building" style="color:var(--teal);font-size:1.3rem;display:block;margin-bottom:.3rem;"></i><div style="font-weight:600;color:var(--text);">${opt.text}</div><div style="font-size:.75rem;margin-top:.2rem;">${opt.dataset.tel||''}</div>`;
+}
+
+// ── LINES ─────────────────────────────────────────────────────────
+function addLine(){
+  lineCount++;
+  const n = lineCount;
+  const prodOpts = PRODUCTS.map(p=>`<option value="${p.ref}" data-price="${p.price}">${p.name}</option>`).join('');
+  const tr = document.createElement('tr');
+  tr.id = `line-${n}`;
+  tr.innerHTML = `
+    <td>
+      <select class="line-input line-select" id="lp-${n}" onchange="onProdSel(${n})">
+        <option value="">— Choisir un produit —</option>
+        ${prodOpts}
+      </select>
+    </td>
+    <td><input type="number" class="line-input" id="lq-${n}" value="1" min="1" oninput="calcLine(${n})" style="width:70px;text-align:center;"/></td>
+    <td><input type="number" class="line-input" id="lpu-${n}" value="" placeholder="0" oninput="calcLine(${n})" style="width:110px;"/></td>
+    <td><input type="number" class="line-input" id="ld-${n}" value="0" min="0" max="100" oninput="calcLine(${n})" style="width:60px;text-align:center;"/></td>
+    <td><span class="line-total" id="lt-${n}">0 BIF</span></td>
+    <td><button class="line-del" onclick="removeLine(${n})" title="Supprimer"><i class="bi bi-x"></i></button></td>`;
+  document.getElementById('linesBody').appendChild(tr);
+  updateSummary();
+}
+
+function onProdSel(n){
+  const sel = document.getElementById(`lp-${n}`);
+  const opt = sel.options[sel.selectedIndex];
+  if(opt.dataset.price) document.getElementById(`lpu-${n}`).value = opt.dataset.price;
+  calcLine(n);
+}
+
+function calcLine(n){
+  const q = +document.getElementById(`lq-${n}`)?.value || 0;
+  const pu = +document.getElementById(`lpu-${n}`)?.value || 0;
+  const d = +document.getElementById(`ld-${n}`)?.value || 0;
+  const total = q * pu * (1 - d/100);
+  const el = document.getElementById(`lt-${n}`);
+  if(el) el.textContent = fmt(Math.round(total));
+  updateSummary();
+}
+
+function removeLine(n){
+  const el = document.getElementById(`line-${n}`);
+  if(el) el.remove();
+  updateSummary();
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────
+function updateSummary(){
+  let totalHT=0, totalDisc=0, lines=0, qty=0;
+  document.querySelectorAll('#linesBody tr').forEach(tr=>{
+    const n = tr.id.replace('line-','');
+    const q = +document.getElementById(`lq-${n}`)?.value || 0;
+    const pu = +document.getElementById(`lpu-${n}`)?.value || 0;
+    const d = +document.getElementById(`ld-${n}`)?.value || 0;
+    if(pu>0){ lines++; qty+=q; }
+    const sub = q*pu;
+    const disc = sub*d/100;
+    totalHT += sub;
+    totalDisc += disc;
+  });
+  const base = totalHT - totalDisc;
+  const tva = base * 0.18;
+  const ttc = base + tva;
+  const acompte = +document.getElementById('acompte')?.value || 0;
+  const solde = ttc - acompte;
+
+  document.getElementById('sumLines').textContent = lines;
+  document.getElementById('sumQty').textContent = qty;
+  document.getElementById('sumHT').textContent = fmt(Math.round(totalHT));
+  document.getElementById('sumDiscount').textContent = '— ' + fmt(Math.round(totalDisc));
+  document.getElementById('sumBase').textContent = fmt(Math.round(base));
+  document.getElementById('sumTVA').textContent = fmt(Math.round(tva));
+  document.getElementById('sumTTC').textContent = fmt(Math.round(ttc));
+  document.getElementById('sumSolde').textContent = fmt(Math.round(Math.max(0,solde)));
+
+  // Echeance
+  const cond = document.getElementById('ordCondPay')?.value;
+  const days = {'comptant':0,'30j':30,'60j':60,'90j':90}[cond]||0;
+  const ech = new Date(); ech.setDate(ech.getDate()+days);
+  document.getElementById('sumCond').textContent = {'comptant':'Comptant','30j':'30 jours','60j':'60 jours','90j':'90 jours'}[cond]||'Comptant';
+  document.getElementById('sumEch').textContent = days===0?'Aujourd\'hui':ech.toLocaleDateString('fr-FR');
+}
+
+function selStatus(btn,s){ orderStatus=s; document.querySelectorAll('.status-opt').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); }
+
+// ── ACTIONS ───────────────────────────────────────────────────────
+function saveDraft(){ toast('Brouillon sauvegardé — CMD-0128','success'); }
+function submitOrder(){
+  const client = document.getElementById('ordClient').value;
+  if(!client){ toast('Veuillez sélectionner un client !','error'); return; }
+  toast('Commande CMD-0128 confirmée avec succès !','success');
+  setTimeout(()=>window.location.href='commandes.html', 1800);
+}
+function printOrder(){ toast('Impression du bon de commande...','info'); }
+
+function fmt(n){ return Number(n).toLocaleString('fr-FR')+' BIF'; }
+
+function toast(msg, type='success'){
+  const s=document.getElementById('ts');
+  const t=document.createElement('div'); t.className=`toast ${type}`;
+  const ic={success:'check-circle-fill',error:'x-circle-fill',info:'info-circle-fill'};
+  const cl={success:'var(--teal)',error:'var(--red)',info:'var(--blue)'};
+  t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
+  s.appendChild(t); setTimeout(()=>t.remove(),3500);
+}
+
+// Auto-update on cond change
+document.getElementById('ordCondPay')?.addEventListener('change',updateSummary);
+</script>
+</body>
+</html>

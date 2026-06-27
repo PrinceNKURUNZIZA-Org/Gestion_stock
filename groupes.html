@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro - Groupes & Droits</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+.gl{display:grid;grid-template-columns:260px 1fr;gap:1.1rem;align-items:start}
+@media(max-width:900px){.gl{grid-template-columns:1fr}}
+.gc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem;position:sticky;top:78px}
+.gi{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:all .15s;margin-bottom:.3rem}
+.gi:hover{background:rgba(255,255,255,.04)}
+.gi.on{background:rgba(16,217,160,.07);border-color:rgba(16,217,160,.25)}
+.gi-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.gi-name{font-weight:600;font-size:.87rem;color:var(--text)}
+.gi-sub{font-size:.73rem;color:var(--muted);margin-top:.08rem}
+.gi-arr{margin-left:auto;font-size:.78rem;color:var(--muted);transition:transform .15s}
+.gi.on .gi-arr{color:var(--teal);transform:translateX(3px)}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.3rem}
+.psec{margin-bottom:1.3rem}
+.psec-title{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem}
+.psec-title::after{content:"";flex:1;height:1px;background:var(--border)}
+.prow{display:flex;align-items:center;justify-content:space-between;padding:.5rem .7rem;border-radius:7px;transition:background .1s}
+.prow:hover{background:rgba(255,255,255,.03)}
+.pname{font-size:.84rem;color:var(--subtle)}
+.tgl{position:relative;width:40px;height:21px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl .ts{position:absolute;inset:0;background:var(--border2);border-radius:999px;cursor:pointer;transition:background .22s}
+.tgl .ts::before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .22s}
+.tgl input:checked+.ts{background:var(--teal)}
+.tgl input:checked+.ts::before{transform:translateX(19px)}
+.chip{display:inline-flex;align-items:center;gap:.4rem;background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:.25rem .65rem .25rem .4rem;font-size:.78rem;color:var(--subtle);margin:.18rem}
+.chip .av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .9rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:"Inter",sans-serif}
+.btn-p{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.btn-p:hover{opacity:.88}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--subtle)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+.btn-sm{padding:.35rem .7rem;font-size:.77rem}
+.btn-d{background:transparent;border:1px solid rgba(239,68,68,.4);color:var(--red);display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .75rem;border-radius:7px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-d:hover{background:var(--red);color:#fff}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;animation:mIn .22s ease;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+@keyframes mIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:2}
+.mh h5{font-family:"Space Grotesk",sans-serif;font-weight:600;font-size:.93rem;color:var(--text)}
+.mc-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+.mc-btn:hover{border-color:var(--red);color:var(--red)}
+.mb{padding:1.3rem 1.4rem}
+.mf{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.5rem;position:sticky;bottom:0;background:var(--card)}
+.fg{margin-bottom:.9rem}
+.fl{display:block;font-size:.69rem;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:.35rem}
+.fc{width:100%;padding:.58rem .82rem;background:var(--panel);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:.875rem;outline:none;transition:border-color .2s;font-family:"Inter",sans-serif}
+.fc:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(16,217,160,.1)}
+.fc::placeholder{color:var(--muted)}
+select.fc{appearance:none;cursor:pointer}
+textarea.fc{resize:vertical;min-height:70px}
+.co-grid{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.25rem}
+.co{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s;flex-shrink:0}
+.co.on{border-color:#fff;box-shadow:0 0 0 2.5px var(--teal)}
+.co:hover{transform:scale(1.1)}
+.empty-perm{text-align:center;padding:2.5rem 1rem;color:var(--muted)}
+.empty-perm i{font-size:2.5rem;opacity:.25;display:block;margin-bottom:.75rem}
+.toast-stack{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.4rem}
+.toast{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:.68rem .95rem;display:flex;align-items:center;gap:.55rem;font-size:.81rem;color:var(--text);min-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tIn .25s ease}
+.toast.success{border-left:3px solid var(--teal)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+@keyframes tIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html"><div class="logo-box"><i class="bi bi-boxes"></i></div><span class="brand-text">Stock<span>Pro</span></span></a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Categories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Requisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link active" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Systeme</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Groupes &amp; Droits d'acces</span>
+    <div style="margin-left:auto;display:flex;gap:.5rem;">
+      <div class="tb-btn"><i class="bi bi-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="breadcrumb"><a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span><span class="cur">Groupes</span></div>
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1><i class="bi bi-shield-lock-fill" style="color:var(--teal);font-size:1.15rem;margin-right:.4rem;"></i>Groupes &amp; Permissions</h1>
+        <p>Definissez les droits d'acces par groupe d'utilisateurs</p>
+      </div>
+      <button class="btn btn-p" onclick="openModal()"><i class="bi bi-plus-lg"></i> Nouveau groupe</button>
+    </div>
+    <div class="gl">
+      <!-- Group list -->
+      <div>
+        <div class="gc" id="groupList"></div>
+      </div>
+      <!-- Permission panel -->
+      <div id="permPanel">
+        <div class="pcard">
+          <div class="empty-perm"><i class="bi bi-shield-lock"></i><p>Selectionnez un groupe pour<br>gerer ses permissions</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="mh"><h5 id="mTitle"><i class="bi bi-shield-plus" style="color:var(--teal);margin-right:.4rem;"></i>Nouveau groupe</h5><button class="mc-btn" onclick="closeModal()">x</button></div>
+    <div class="mb">
+      <div class="fg"><label class="fl">Nom du groupe *</label><input class="fc" id="gNom" placeholder="Ex: Magasiniers"/></div>
+      <div class="fg"><label class="fl">Description</label><textarea class="fc" id="gDesc" rows="2" placeholder="Role de ce groupe..."></textarea></div>
+      <div class="fg">
+        <label class="fl">Couleur</label>
+        <div class="co-grid">
+          <div class="co on" style="background:#10d9a0" data-c="#10d9a0" onclick="pickColor(this)"></div>
+          <div class="co" style="background:#3b82f6" data-c="#3b82f6" onclick="pickColor(this)"></div>
+          <div class="co" style="background:#8b5cf6" data-c="#8b5cf6" onclick="pickColor(this)"></div>
+          <div class="co" style="background:#f59e0b" data-c="#f59e0b" onclick="pickColor(this)"></div>
+          <div class="co" style="background:#ef4444" data-c="#ef4444" onclick="pickColor(this)"></div>
+          <div class="co" style="background:#ec4899" data-c="#ec4899" onclick="pickColor(this)"></div>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Basé sur le role</label><select class="fc" id="gRole"><option value="">Personnalise</option><option>Administrateur</option><option>Magasinier</option><option>Caissier</option><option>Acheteur</option><option>Lecteur</option></select></div>
+      <div id="gErr" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:.6rem .9rem;font-size:.82rem;color:var(--red);margin-top:.4rem;"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-p" onclick="saveGroup()"><i class="bi bi-check-lg"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="ts"></div>
+
+<script>
+const PERMS = {
+  "Produits & Stock": [
+    {k:"voir_produits",l:"Voir les produits"},
+    {k:"creer_produits",l:"Creer des produits"},
+    {k:"modifier_produits",l:"Modifier des produits"},
+    {k:"supprimer_produits",l:"Supprimer des produits"},
+    {k:"voir_stocks",l:"Voir les stocks"},
+    {k:"mouvement_stock",l:"Faire des mouvements de stock"},
+  ],
+  "Achats": [
+    {k:"voir_achats",l:"Voir les achats"},
+    {k:"creer_achats",l:"Creer des bons d'achat"},
+    {k:"valider_achats",l:"Valider les achats"},
+    {k:"voir_fournisseurs",l:"Voir les fournisseurs"},
+    {k:"gerer_fournisseurs",l:"Gerer les fournisseurs"},
+  ],
+  "Ventes & POS": [
+    {k:"faire_vente",l:"Effectuer une vente (POS)"},
+    {k:"voir_commandes",l:"Voir les commandes"},
+    {k:"creer_commandes",l:"Creer des commandes"},
+    {k:"valider_commandes",l:"Valider/livrer les commandes"},
+    {k:"annuler_commandes",l:"Annuler des commandes"},
+    {k:"voir_clients",l:"Voir les clients"},
+    {k:"gerer_clients",l:"Gerer les clients"},
+    {k:"voir_paiements",l:"Voir les paiements"},
+    {k:"enregistrer_paiements",l:"Enregistrer des paiements"},
+    {k:"rembourser",l:"Effectuer des remboursements"},
+  ],
+  "Inventaire & Alertes": [
+    {k:"voir_inventaire",l:"Voir les inventaires"},
+    {k:"creer_inventaire",l:"Creer un inventaire"},
+    {k:"valider_inventaire",l:"Valider un inventaire"},
+    {k:"voir_alertes",l:"Voir les alertes stock"},
+    {k:"config_alertes",l:"Configurer les alertes"},
+  ],
+  "Rapports": [
+    {k:"voir_rapports",l:"Voir les rapports"},
+    {k:"exporter_rapports",l:"Exporter les rapports"},
+  ],
+  "Administration": [
+    {k:"gerer_utilisateurs",l:"Gerer les utilisateurs"},
+    {k:"gerer_groupes",l:"Gerer les groupes & droits"},
+    {k:"gerer_entrepots",l:"Gerer les entrepots"},
+    {k:"gerer_categories",l:"Gerer les categories"},
+    {k:"parametres_systeme",l:"Parametres systeme"},
+    {k:"voir_logs",l:"Voir les journaux d'audit"},
+  ],
+};
+
+const ROLES_DEFAULT = {
+  "Administrateur": Object.values(PERMS).flat().map(p=>p.k),
+  "Magasinier": ["voir_produits","creer_produits","modifier_produits","voir_stocks","mouvement_stock","voir_achats","voir_fournisseurs","voir_commandes","voir_alertes","voir_inventaire","voir_rapports"],
+  "Caissier": ["voir_produits","voir_stocks","faire_vente","voir_commandes","creer_commandes","voir_clients","voir_paiements","enregistrer_paiements","voir_alertes"],
+  "Acheteur": ["voir_produits","voir_stocks","voir_achats","creer_achats","valider_achats","voir_fournisseurs","gerer_fournisseurs","voir_rapports","exporter_rapports"],
+  "Lecteur": ["voir_produits","voir_stocks","voir_commandes","voir_clients","voir_paiements","voir_rapports","voir_alertes"],
+};
+
+const MEMBERS = {1:["Admin Systeme"],2:["Jean Hakizimana","Marie Niyonzima","Claude Nkurunziza"],3:["Marie Niyonzima"],4:["Pierre Ndayisenga"],5:["Alice Bukuru"]};
+const AV_COLORS = ["linear-gradient(135deg,#10d9a0,#3b82f6)","linear-gradient(135deg,#8b5cf6,#f78166)","linear-gradient(135deg,#f59e0b,#ef4444)"];
+
+let GROUPS = [
+  {id:1,nom:"Admins",desc:"Acces complet au systeme",color:"#ef4444",perms:[...ROLES_DEFAULT["Administrateur"]]},
+  {id:2,nom:"Magasiniers",desc:"Gestion quotidienne du stock",color:"#10d9a0",perms:[...ROLES_DEFAULT["Magasinier"]]},
+  {id:3,nom:"Caissiers",desc:"Ventes et encaissements POS",color:"#3b82f6",perms:[...ROLES_DEFAULT["Caissier"]]},
+  {id:4,nom:"Acheteurs",desc:"Gestion des achats fournisseurs",color:"#f59e0b",perms:[...ROLES_DEFAULT["Acheteur"]]},
+  {id:5,nom:"Lecteurs",desc:"Consultation uniquement",color:"#8b5cf6",perms:[...ROLES_DEFAULT["Lecteur"]]},
+];
+let selId = null, editId = null, pickedColor = "#10d9a0";
+
+function renderList(){
+  const total = Object.values(PERMS).flat().length;
+  document.getElementById("groupList").innerHTML = GROUPS.map(g=>`
+    <div class="gi ${selId===g.id?"on":""}" onclick="selGroup(${g.id})">
+      <div class="gi-ico" style="background:${g.color}22;color:${g.color}"><i class="bi bi-shield-lock-fill"></i></div>
+      <div><div class="gi-name">${g.nom}</div><div class="gi-sub">${(MEMBERS[g.id]||[]).length} membre(s) · ${g.perms.length}/${total} droits</div></div>
+      <i class="bi bi-chevron-right gi-arr"></i>
+    </div>`).join("");
+}
+
+function selGroup(id){
+  selId=id; renderList(); renderPerm(id);
+}
+
+function renderPerm(id){
+  const g = GROUPS.find(x=>x.id===id);
+  const total = Object.values(PERMS).flat().length;
+  const pct = Math.round(g.perms.length/total*100);
+  const members = (MEMBERS[id]||[]);
+  
+  let html = `<div class="pcard">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1.1rem;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <div style="width:42px;height:42px;border-radius:11px;background:${g.color}22;color:${g.color};display:flex;align-items:center;justify-content:center;font-size:1.1rem;"><i class="bi bi-shield-lock-fill"></i></div>
+        <div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;color:var(--text);">${g.nom}</div><div style="font-size:.78rem;color:var(--muted);margin-top:.1rem;">${g.desc}</div></div>
+      </div>
+      <div style="display:flex;gap:.4rem;">
+        <button class="btn btn-g btn-sm" onclick="editGroup(${g.id})"><i class="bi bi-pencil"></i></button>
+        <button class="btn-d btn-sm" onclick="delGroup(${g.id})"><i class="bi bi-trash3"></i></button>
+      </div>
+    </div>
+    <!-- Members -->
+    <div style="margin-bottom:1.1rem;">
+      <div style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:.5rem;">Membres (${members.length})</div>
+      <div>
+        ${members.map((m,i)=>`<span class="chip"><div class="av" style="background:${AV_COLORS[i%AV_COLORS.length]}">${m.split(" ").map(w=>w[0]).join("").slice(0,2)}</div>${m}</span>`).join("")}
+        <button class="btn btn-g" style="font-size:.75rem;padding:.22rem .6rem;border-radius:999px;margin:.18rem;" onclick="toast('Ajout membre via page Utilisateurs','info')"><i class="bi bi-plus-lg"></i> Ajouter</button>
+      </div>
+    </div>
+    <!-- Progress -->
+    <div style="margin-bottom:1.1rem;">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem;"><span style="color:var(--muted);">Permissions actives</span><span style="font-weight:700;color:${g.color};">${g.perms.length} / ${total} (${pct}%)</span></div>
+      <div style="height:6px;background:var(--border);border-radius:999px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${g.color};border-radius:999px;transition:width .5s ease;"></div></div>
+    </div>
+    <!-- Bulk actions -->
+    <div style="display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <button class="btn btn-p btn-sm" onclick="setAll(${id},true)"><i class="bi bi-check2-all"></i> Tout activer</button>
+      <button class="btn btn-g btn-sm" onclick="setAll(${id},false)"><i class="bi bi-x-lg"></i> Tout désactiver</button>
+      <button class="btn btn-g btn-sm" onclick="savePerms(${id})" style="margin-left:auto;"><i class="bi bi-floppy"></i> Sauvegarder</button>
+    </div>`;
+
+  // Permission sections
+  Object.entries(PERMS).forEach(([sec,perms])=>{
+    html += `<div class="psec"><div class="psec-title">${sec}</div>`;
+    perms.forEach(p=>{
+      const on = g.perms.includes(p.k);
+      html += `<div class="prow"><span class="pname">${p.l}</span>
+        <label class="tgl"><input type="checkbox" ${on?"checked":""} onchange="togglePerm(${id},'${p.k}',this)"/><span class="ts"></span></label></div>`;
+    });
+    html += `</div>`;
+  });
+  html += `</div>`;
+  document.getElementById("permPanel").innerHTML = html;
+}
+
+function togglePerm(id, key, cb){
+  const g = GROUPS.find(x=>x.id===id);
+  if(cb.checked){ if(!g.perms.includes(key)) g.perms.push(key); }
+  else { g.perms = g.perms.filter(k=>k!==key); }
+  renderList();
+  toast(cb.checked ? "Permission accordee" : "Permission retiree", cb.checked?"success":"error");
+}
+
+function setAll(id, on){
+  const g = GROUPS.find(x=>x.id===id);
+  g.perms = on ? Object.values(PERMS).flat().map(p=>p.k) : [];
+  renderPerm(id); renderList();
+  toast(on?"Toutes les permissions activees":"Toutes les permissions desactivees", on?"success":"error");
+}
+
+function savePerms(id){
+  const g = GROUPS.find(x=>x.id===id);
+  toast("Permissions du groupe '" + g.nom + "' sauvegardees","success");
+}
+
+function pickColor(el){
+  document.querySelectorAll(".co").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on"); pickedColor = el.dataset.c;
+}
+
+function openModal(){
+  editId=null;
+  document.getElementById("mTitle").innerHTML = '<i class="bi bi-shield-plus" style="color:var(--teal);margin-right:.4rem;"></i>Nouveau groupe';
+  document.getElementById("gNom").value="";
+  document.getElementById("gDesc").value="";
+  document.getElementById("gRole").value="";
+  document.getElementById("gErr").style.display="none";
+  pickedColor="#10d9a0";
+  document.querySelectorAll(".co").forEach(c=>c.classList.toggle("on",c.dataset.c==="#10d9a0"));
+  document.getElementById("modal").classList.add("open");
+}
+
+function editGroup(id){
+  editId=id;
+  const g=GROUPS.find(x=>x.id===id);
+  document.getElementById("mTitle").innerHTML = '<i class="bi bi-pencil" style="color:var(--blue);margin-right:.4rem;"></i>Modifier le groupe';
+  document.getElementById("gNom").value=g.nom;
+  document.getElementById("gDesc").value=g.desc;
+  document.getElementById("gErr").style.display="none";
+  pickedColor=g.color;
+  document.querySelectorAll(".co").forEach(c=>c.classList.toggle("on",c.dataset.c===g.color));
+  document.getElementById("modal").classList.add("open");
+}
+
+function closeModal(){document.getElementById("modal").classList.remove("open");}
+
+function saveGroup(){
+  const nom=document.getElementById("gNom").value.trim();
+  const errEl=document.getElementById("gErr");
+  if(!nom){errEl.style.display="block";errEl.textContent="Le nom du groupe est obligatoire.";return;}
+  const role=document.getElementById("gRole").value;
+  const perms=role&&ROLES_DEFAULT[role]?[...ROLES_DEFAULT[role]]:[];
+  const data={nom,desc:document.getElementById("gDesc").value,color:pickedColor,perms};
+  if(editId){
+    const i=GROUPS.findIndex(x=>x.id===editId);
+    GROUPS[i]={...GROUPS[i],...data};
+    if(selId===editId) renderPerm(editId);
+    toast("Groupe mis a jour","success");
+  } else {
+    const newG={id:Date.now(),perms:perms,...data};
+    GROUPS.push(newG);
+    toast("Groupe cree","success");
+  }
+  closeModal(); renderList();
+}
+
+function delGroup(id){
+  if(!confirm("Supprimer ce groupe ?")) return;
+  GROUPS=GROUPS.filter(x=>x.id!==id);
+  if(selId===id){selId=null;document.getElementById("permPanel").innerHTML='<div class="pcard"><div class="empty-perm"><i class="bi bi-shield-lock"></i><p>Selectionnez un groupe pour<br>gerer ses permissions</p></div></div>';}
+  renderList(); toast("Groupe supprime","error");
+}
+
+function toast(msg,type="success"){
+  const s=document.getElementById("ts");const t=document.createElement("div");t.className="toast "+type;
+  const ic={success:"check-circle-fill",error:"x-circle-fill",info:"info-circle-fill"};
+  const cl={success:"var(--teal)",error:"var(--red)",info:"var(--blue)"};
+  t.innerHTML='<i class="bi bi-'+ic[type]+'" style="color:'+cl[type]+';flex-shrink:0;"></i><span>'+msg+"</span>";
+  s.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+
+renderList();
+</script>
+</body>
+</html>

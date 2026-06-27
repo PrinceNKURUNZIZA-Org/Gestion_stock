@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>StockPro - Entreprise & Parametres</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="_shared.css"/>
+<style>
+.sw{display:grid;grid-template-columns:220px 1fr;gap:1.1rem;align-items:start}
+@media(max-width:800px){.sw{grid-template-columns:1fr}}
+.sn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:.55rem;position:sticky;top:78px}
+.ss{font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;padding:.55rem .65rem .2rem}
+.sb{display:flex;align-items:center;gap:.6rem;padding:.52rem .75rem;border-radius:7px;width:100%;border:none;background:none;color:var(--muted);font-size:.83rem;font-weight:500;text-align:left;cursor:pointer;transition:all .15s;margin-bottom:.08rem}
+.sb i{font-size:.9rem;width:16px;text-align:center}
+.sb:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.sb.on{background:rgba(16,217,160,.1);color:var(--teal)}
+.sd{height:1px;background:var(--border);margin:.4rem .35rem}
+.tp{display:none}.tp.on{display:block}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.9rem}
+.st{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:.87rem;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;padding-bottom:.65rem;border-bottom:1px solid var(--border)}
+.st i{color:var(--teal)}
+.fg{margin-bottom:.9rem}
+.fl{display:block;font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:.35rem}
+.fc{width:100%;padding:.58rem .82rem;background:var(--panel);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-size:.875rem;outline:none;transition:border-color .2s,box-shadow .2s;font-family:"Inter",sans-serif}
+.fc:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(16,217,160,.1)}
+.fc::placeholder{color:var(--muted)}
+select.fc{appearance:none;cursor:pointer}
+textarea.fc{resize:vertical;min-height:75px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem}
+@media(max-width:600px){.r2,.r3{grid-template-columns:1fr}}
+.fh{font-size:.71rem;color:var(--muted);margin-top:.22rem}
+.tr{display:flex;align-items:flex-start;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid rgba(42,51,71,.4);gap:1rem}
+.tr:last-child{border-bottom:none}
+.ti .tt{font-size:.86rem;font-weight:500;color:var(--text);margin-bottom:.12rem}
+.ti .td{font-size:.75rem;color:var(--muted);line-height:1.4}
+.tg{position:relative;width:42px;height:22px;flex-shrink:0;margin-top:2px}
+.tg input{opacity:0;width:0;height:0}
+.tg .ts{position:absolute;inset:0;background:var(--border2);border-radius:999px;cursor:pointer;transition:background .22s}
+.tg .ts::before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .22s}
+.tg input:checked+.ts{background:var(--teal)}
+.tg input:checked+.ts::before{transform:translateX(20px)}
+.cs{display:flex;gap:.45rem;flex-wrap:wrap}
+.sw2{width:34px;height:34px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .15s;flex-shrink:0}
+.sw2.on{border-color:#fff;box-shadow:0 0 0 3px var(--teal)}
+.sw2:hover{transform:scale(1.1)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem .9rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:"Inter",sans-serif;text-decoration:none}
+.btn-p{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.btn-p:hover{opacity:.88;color:#fff}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--subtle)}
+.btn-g:hover{border-color:var(--teal);color:var(--teal)}
+.btn-d{background:transparent;border:1px solid rgba(239,68,68,.4);color:var(--red);display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-d:hover{background:var(--red);color:#fff}
+.dz{border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.04);border-radius:9px;padding:.95rem 1.1rem;margin-bottom:.65rem}
+.dz .dt{font-size:.86rem;font-weight:700;color:var(--red);margin-bottom:.3rem}
+.dz .dd{font-size:.79rem;color:var(--muted);margin-bottom:.75rem;line-height:1.5}
+.toast-stack{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.4rem}
+.toast{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:.68rem .95rem;display:flex;align-items:center;gap:.55rem;font-size:.81rem;color:var(--text);min-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tIn .25s ease}
+.toast.success{border-left:3px solid var(--teal)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+@keyframes tIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.br{display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;background:var(--panel);border-radius:7px;margin-bottom:.38rem;font-size:.81rem}
+.lic{background:linear-gradient(135deg,rgba(16,217,160,.06),rgba(59,130,246,.06));border:1px solid rgba(16,217,160,.2);border-radius:10px;padding:1.15rem;margin-bottom:.9rem}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <a class="sb-brand" href="dashboard.html"><div class="logo-box"><i class="bi bi-boxes"></i></div><span class="brand-text">Stock<span>Pro</span></span></a>
+  <div class="sb-section">Principal</div>
+  <a class="sb-link" href="dashboard.html"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+  <a class="sb-link" href="pos.html"><i class="bi bi-cash-register"></i> Point de Vente <span class="sb-badge">POS</span></a>
+  <div class="sb-section">Stock</div>
+  <a class="sb-link" href="categories.html"><i class="bi bi-tags-fill"></i> Categories</a>
+  <a class="sb-link" href="produits.html"><i class="bi bi-box-seam"></i> Produits</a>
+  <a class="sb-link" href="stocks.html"><i class="bi bi-archive-fill"></i> Stocks</a>
+  <a class="sb-link" href="requisitions.html"><i class="bi bi-clipboard2-plus"></i> Requisitions</a>
+  <a class="sb-link" href="alertes-stock.html"><i class="bi bi-exclamation-triangle-fill"></i> Alertes Stock <span class="sb-badge red">14</span></a>
+  <div class="sb-section">Achats</div>
+  <a class="sb-link" href="fournisseurs.html"><i class="bi bi-truck"></i> Fournisseurs</a>
+  <a class="sb-link" href="achats.html"><i class="bi bi-bag-plus-fill"></i> Achats</a>
+  <div class="sb-section">Ventes</div>
+  <a class="sb-link" href="clients.html"><i class="bi bi-people-fill"></i> Clients</a>
+  <a class="sb-link" href="commandes.html"><i class="bi bi-cart3"></i> Commandes <span class="sb-badge amber">5</span></a>
+  <a class="sb-link" href="paiements.html"><i class="bi bi-credit-card-fill"></i> Paiements</a>
+  <div class="sb-section">Administration</div>
+  <a class="sb-link" href="utilisateurs.html"><i class="bi bi-person-badge-fill"></i> Utilisateurs</a>
+  <a class="sb-link" href="groupes.html"><i class="bi bi-shield-lock-fill"></i> Groupes</a>
+  <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
+  <a class="sb-link active" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
+  <div class="sb-footer">
+    <a class="sb-user" href="login.html">
+      <div class="sb-avatar">A</div>
+      <div><div class="u-name">Admin Systeme</div><div class="u-role">Administrateur</div></div>
+      <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
+    </a>
+  </div>
+</nav>
+<div class="main">
+  <div class="topbar">
+    <span class="topbar-title">Entreprise &amp; Parametres</span>
+    <div style="margin-left:auto;"><div class="tb-btn"><i class="bi bi-bell"></i><span class="notif-dot"></span></div></div>
+  </div>
+  <div class="page-content">
+    <div class="breadcrumb"><a href="dashboard.html">Accueil</a><span class="sep"><i class="bi bi-chevron-right"></i></span><span class="cur">Entreprise</span></div>
+    <div style="margin-bottom:1.25rem"><h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;color:var(--text)">&#9881;&#65039; Parametres de l'entreprise</h1><p style="font-size:.83rem;color:var(--muted);margin-top:.18rem">Configurez les informations, preferences et parametres systeme</p></div>
+    <div class="sw">
+      <div class="sn">
+        <div class="ss">Entreprise</div>
+        <button class="sb on" onclick="show('infos',this)"><i class="bi bi-building-fill"></i> Informations</button>
+        <button class="sb" onclick="show('fiscal',this)"><i class="bi bi-file-earmark-text-fill"></i> Fiscal &amp; Legal</button>
+        <div class="ss">Application</div>
+        <button class="sb" onclick="show('apparence',this)"><i class="bi bi-palette-fill"></i> Apparence</button>
+        <button class="sb" onclick="show('stock',this)"><i class="bi bi-archive-fill"></i> Param. Stock</button>
+        <button class="sb" onclick="show('ventes',this)"><i class="bi bi-cart3"></i> Param. Ventes</button>
+        <button class="sb" onclick="show('notifs',this)"><i class="bi bi-bell-fill"></i> Notifications</button>
+        <div class="ss">Systeme</div>
+        <button class="sb" onclick="show('secu',this)"><i class="bi bi-shield-lock-fill"></i> Securite</button>
+        <button class="sb" onclick="show('backup',this)"><i class="bi bi-cloud-arrow-up-fill"></i> Sauvegarde</button>
+        <button class="sb" onclick="show('licence',this)"><i class="bi bi-patch-check-fill"></i> Licence</button>
+        <div class="sd"></div>
+        <button class="sb" onclick="show('danger',this)" style="color:var(--red)"><i class="bi bi-exclamation-triangle-fill" style="color:var(--red)"></i> Zone de danger</button>
+      </div>
+      <div>
+
+        <!-- INFOS -->
+        <div class="tp on" id="tp-infos">
+          <div class="sc">
+            <div class="st"><i class="bi bi-building-fill"></i>Identite de l'entreprise</div>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+              <div style="width:78px;height:78px;border-radius:16px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.5rem;color:#fff;box-shadow:0 0 20px rgba(16,217,160,.2)">SP</div>
+              <div>
+                <div style="border:2px dashed var(--border2);border-radius:9px;padding:.65rem 1rem;cursor:pointer;font-size:.82rem;color:var(--muted);display:inline-flex;align-items:center;gap:.4rem" onclick="toast('Logo: disponible en version Pro','info')"><i class="bi bi-cloud-upload"></i> Changer le logo</div>
+                <div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">PNG/JPG · Max 2 MB · 200x200px</div>
+              </div>
+            </div>
+            <div class="r2"><div class="fg"><label class="fl">Raison sociale *</label><input class="fc" value="StockPro SARL"/></div><div class="fg"><label class="fl">Nom commercial</label><input class="fc" value="StockPro"/></div></div>
+            <div class="fg"><label class="fl">Adresse du siege social *</label><input class="fc" value="Avenue de la Liberte, Quartier Rohero, Bujumbura"/></div>
+            <div class="r3"><div class="fg"><label class="fl">Tel. principal</label><input class="fc" value="+257 22 20 00 00"/></div><div class="fg"><label class="fl">Tel. secondaire</label><input class="fc" value="+257 79 00 11 22"/></div><div class="fg"><label class="fl">Email</label><input class="fc" type="email" value="contact@stockpro.bi"/></div></div>
+            <div class="r2"><div class="fg"><label class="fl">Site web</label><input class="fc" value="www.stockpro.bi"/></div><div class="fg"><label class="fl">Secteur</label><select class="fc"><option selected>Commerce general</option><option>Informatique</option><option>Agroalimentaire</option><option>Pharmaceutique</option></select></div></div>
+            <div class="r3"><div class="fg"><label class="fl">Devise *</label><select class="fc"><option selected>BIF - Franc burundais</option><option>USD</option><option>EUR</option></select></div><div class="fg"><label class="fl">Langue</label><select class="fc"><option selected>Francais</option><option>English</option><option>Kirundi</option></select></div><div class="fg"><label class="fl">Fuseau horaire</label><select class="fc"><option selected>Africa/Bujumbura (UTC+2)</option><option>Africa/Nairobi (UTC+3)</option></select></div></div>
+            <div class="fg"><label class="fl">Description</label><textarea class="fc" rows="2">Systeme de gestion de stock intelligent pour les entreprises burundaises.</textarea></div>
+            <button class="btn btn-p" onclick="save('informations')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- FISCAL -->
+        <div class="tp" id="tp-fiscal">
+          <div class="sc">
+            <div class="st"><i class="bi bi-file-earmark-text-fill"></i>Informations fiscales</div>
+            <div class="r2"><div class="fg"><label class="fl">NIF *</label><input class="fc" value="1234567890"/><p class="fh">Apparait sur toutes les factures</p></div><div class="fg"><label class="fl">RC</label><input class="fc" value="RC-2020-0001"/></div></div>
+            <div class="r2"><div class="fg"><label class="fl">Banque principale</label><input class="fc" value="BCB - Banque Commerciale du Burundi"/></div><div class="fg"><label class="fl">Numero de compte</label><input class="fc" value="BCB 001 234567 890"/></div></div>
+            <div class="r3"><div class="fg"><label class="fl">SWIFT/BIC</label><input class="fc" value="BCBIBIBJ"/></div><div class="fg"><label class="fl">TVA defaut</label><select class="fc"><option>0%</option><option>10%</option><option selected>18%</option></select></div><div class="fg"><label class="fl">Format facture</label><input class="fc" value="FAC-{YEAR}-{NUM}"/></div></div>
+            <div class="r2"><div class="fg"><label class="fl">Prefixe commandes</label><input class="fc" value="CMD-"/></div><div class="fg"><label class="fl">Prefixe achats</label><input class="fc" value="ACH-"/></div></div>
+            <div class="fg"><label class="fl">Mentions legales</label><textarea class="fc" rows="3">StockPro SARL - RC-2020-0001 - NIF 1234567890&#10;Tout reglement apres echeance majore de 1% par mois de retard.</textarea></div>
+            <button class="btn btn-p" onclick="save('fiscal')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- APPARENCE -->
+        <div class="tp" id="tp-apparence">
+          <div class="sc">
+            <div class="st"><i class="bi bi-palette-fill"></i>Theme &amp; Couleurs</div>
+            <div class="fg"><label class="fl">Couleur principale</label>
+              <div class="cs">
+                <div class="sw2 on" style="background:#10d9a0" onclick="setColor('#10d9a0',this)"></div>
+                <div class="sw2" style="background:#3b82f6" onclick="setColor('#3b82f6',this)"></div>
+                <div class="sw2" style="background:#8b5cf6" onclick="setColor('#8b5cf6',this)"></div>
+                <div class="sw2" style="background:#f59e0b" onclick="setColor('#f59e0b',this)"></div>
+                <div class="sw2" style="background:#ef4444" onclick="setColor('#ef4444',this)"></div>
+                <div class="sw2" style="background:#ec4899" onclick="setColor('#ec4899',this)"></div>
+              </div>
+            </div>
+            <div class="r2"><div class="fg"><label class="fl">Densite</label><select class="fc"><option selected>Confortable</option><option>Compact</option><option>Etendu</option></select></div><div class="fg"><label class="fl">Format dates</label><select class="fc"><option selected>DD/MM/YYYY</option><option>YYYY-MM-DD</option></select></div></div>
+            <button class="btn btn-p" onclick="save('apparence')"><i class="bi bi-floppy"></i> Appliquer</button>
+          </div>
+        </div>
+
+        <!-- STOCK -->
+        <div class="tp" id="tp-stock">
+          <div class="sc">
+            <div class="st"><i class="bi bi-archive-fill"></i>Regles de gestion du stock</div>
+            <div class="tr"><div class="ti"><div class="tt">Alertes stock faible automatiques</div><div class="td">Notifier quand un produit atteint son seuil minimum</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Bloquer sorties si stock insuffisant</div><div class="td">Empecher les mouvements negatifs de stock</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Gestion FIFO</div><div class="td">Premier entre, premier sorti lors des sorties</div></div><label class="tg"><input type="checkbox"/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Validation requise pour mouvements</div><div class="td">Approbation superviseur obligatoire</div></div><label class="tg"><input type="checkbox"/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Suivi dates d'expiration</div><div class="td">Gestion des perempations et alertes</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Multi-entrepots actif</div><div class="td">Gerer le stock par entrepot et par zone</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+          </div>
+          <div class="sc">
+            <div class="st"><i class="bi bi-sliders"></i>Seuils par defaut</div>
+            <div class="r3"><div class="fg"><label class="fl">Seuil alerte global</label><input type="number" class="fc" value="5"/></div><div class="fg"><label class="fl">Alerte expiration (jours)</label><input type="number" class="fc" value="30"/></div><div class="fg"><label class="fl">Frequence inventaire</label><select class="fc"><option>Mensuel</option><option selected>Semestriel</option><option>Annuel</option></select></div></div>
+            <button class="btn btn-p" onclick="save('stock')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- VENTES -->
+        <div class="tp" id="tp-ventes">
+          <div class="sc">
+            <div class="st"><i class="bi bi-cart3"></i>Parametres des ventes</div>
+            <div class="tr"><div class="ti"><div class="tt">Activer les remises commerciales</div><div class="td">Permettre aux commerciaux d'accorder des remises</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Gestion des credits clients</div><div class="td">Autoriser la vente a credit et suivre les soldes dus</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Envoi automatique facture par email</div><div class="td">Envoyer la facture apres confirmation de paiement</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Impression automatique recu POS</div><div class="td">Imprimer le recu apres chaque vente au caisse</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+          </div>
+          <div class="sc">
+            <div class="st"><i class="bi bi-cash-register"></i>Limites &amp; Defauts</div>
+            <div class="r2"><div class="fg"><label class="fl">Remise max (%)</label><input type="number" class="fc" value="20"/></div><div class="fg"><label class="fl">Limite credit client (BIF)</label><input type="number" class="fc" value="1000000"/></div></div>
+            <button class="btn btn-p" onclick="save('ventes')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- NOTIFS -->
+        <div class="tp" id="tp-notifs">
+          <div class="sc">
+            <div class="st"><i class="bi bi-bell-fill"></i>Preferences de notifications</div>
+            <div class="tr"><div class="ti"><div class="tt">Stock faible</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Rupture de stock</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Expiration proche</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Nouvelle commande client</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Paiement recu</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Rapport journalier automatique</div></div><label class="tg"><input type="checkbox"/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Connexion suspecte</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+          </div>
+          <div class="sc">
+            <div class="st"><i class="bi bi-envelope-fill"></i>Destinataires</div>
+            <div class="r2"><div class="fg"><label class="fl">Email rapports</label><input class="fc" type="email" value="admin@stockpro.bi"/></div><div class="fg"><label class="fl">Heure rapport journalier</label><input type="time" class="fc" value="07:00"/></div></div>
+            <button class="btn btn-p" onclick="save('notifications')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- SECURITE -->
+        <div class="tp" id="tp-secu">
+          <div class="sc">
+            <div class="st"><i class="bi bi-shield-lock-fill"></i>Securite des acces</div>
+            <div class="tr"><div class="ti"><div class="tt">Authentification 2FA</div><div class="td">Exiger un code OTP en plus du mot de passe</div></div><label class="tg"><input type="checkbox"/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Deconnexion automatique (session inactive)</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Journal d'activite (audit log)</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Bloquer apres 5 tentatives echouees</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+          </div>
+          <div class="sc">
+            <div class="st"><i class="bi bi-key-fill"></i>Politique mots de passe</div>
+            <div class="r3"><div class="fg"><label class="fl">Longueur min.</label><input type="number" class="fc" value="8"/></div><div class="fg"><label class="fl">Duree session (min)</label><input type="number" class="fc" value="60"/></div><div class="fg"><label class="fl">Expiration MDP (jours)</label><input type="number" class="fc" value="90"/></div></div>
+            <button class="btn btn-p" onclick="save('securite')"><i class="bi bi-floppy"></i> Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- BACKUP -->
+        <div class="tp" id="tp-backup">
+          <div class="sc">
+            <div style="display:flex;align-items:center;gap:.7rem;background:rgba(16,217,160,.06);border:1px solid rgba(16,217,160,.2);border-radius:9px;padding:.9rem 1rem;margin-bottom:1rem">
+              <i class="bi bi-check-circle-fill" style="color:var(--teal);font-size:1.25rem;flex-shrink:0"></i>
+              <div style="flex:1"><div style="font-weight:600;font-size:.87rem;color:var(--text)">Derniere sauvegarde reussie</div><div style="font-size:.77rem;color:var(--muted);margin-top:.1rem">Aujourd'hui 03:00 · 52,4 MB · Cloud + Local</div></div>
+              <button class="btn btn-p" style="font-size:.78rem;padding:.4rem .8rem" onclick="toast('Sauvegarde demarree...','info')"><i class="bi bi-cloud-arrow-up"></i> Sauvegarder</button>
+            </div>
+            <div class="st"><i class="bi bi-cloud-arrow-up-fill"></i>Parametres de sauvegarde</div>
+            <div class="tr"><div class="ti"><div class="tt">Sauvegarde automatique quotidienne</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="tr"><div class="ti"><div class="tt">Inclure les fichiers medias</div></div><label class="tg"><input type="checkbox" checked/><span class="ts"></span></label></div>
+            <div class="r3" style="margin-top:.8rem"><div class="fg"><label class="fl">Heure</label><input type="time" class="fc" value="03:00"/></div><div class="fg"><label class="fl">Retention (jours)</label><select class="fc"><option>7</option><option selected>30</option><option>90</option></select></div><div class="fg"><label class="fl">Destination</label><select class="fc"><option selected>Cloud + Local</option><option>Cloud</option><option>Local</option></select></div></div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+              <button class="btn btn-g" onclick="toast('Export CSV...','info')"><i class="bi bi-download"></i> Exporter CSV</button>
+              <button class="btn btn-g" onclick="toast('Restauration en Pro','info')"><i class="bi bi-cloud-arrow-down"></i> Restaurer</button>
+            </div>
+            <div class="st"><i class="bi bi-clock-history"></i>Historique</div>
+            <div class="br"><div><div style="font-weight:500;color:var(--text)">Sauvegarde automatique</div><div style="font-size:.73rem;color:var(--muted)">Aujourd'hui 03:00 · 52,4 MB</div></div><button class="btn btn-g" style="font-size:.76rem;padding:.35rem .65rem" onclick="toast('Restauration...','info')"><i class="bi bi-cloud-arrow-down"></i></button></div>
+            <div class="br"><div><div style="font-weight:500;color:var(--text)">Sauvegarde automatique</div><div style="font-size:.73rem;color:var(--muted)">Hier 03:00 · 51,9 MB</div></div><button class="btn btn-g" style="font-size:.76rem;padding:.35rem .65rem" onclick="toast('Restauration...','info')"><i class="bi bi-cloud-arrow-down"></i></button></div>
+            <div class="br"><div><div style="font-weight:500;color:var(--text)">Sauvegarde manuelle</div><div style="font-size:.73rem;color:var(--muted)">07/06/2025 14:22 · 51,2 MB</div></div><button class="btn btn-g" style="font-size:.76rem;padding:.35rem .65rem" onclick="toast('Restauration...','info')"><i class="bi bi-cloud-arrow-down"></i></button></div>
+          </div>
+        </div>
+
+        <!-- LICENCE -->
+        <div class="tp" id="tp-licence">
+          <div class="lic">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.8rem;margin-bottom:.9rem">
+              <div><div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem">Plan actuel</div><div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;color:var(--teal)">StockPro Professional</div></div>
+              <span style="background:rgba(16,217,160,.15);color:var(--teal);padding:.35rem .9rem;border-radius:999px;font-size:.8rem;font-weight:700">&#9679; ACTIF</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.75rem;margin-bottom:.8rem">
+              <div><div style="font-size:.67rem;color:var(--muted)">Expiration</div><div style="font-weight:700;color:var(--text);font-size:.87rem;margin-top:.2rem">31 Dec 2025</div></div>
+              <div><div style="font-size:.67rem;color:var(--muted)">Utilisateurs</div><div style="font-weight:700;color:var(--text);font-size:.87rem;margin-top:.2rem">6 / 20</div></div>
+              <div><div style="font-size:.67rem;color:var(--muted)">Entrepots</div><div style="font-weight:700;color:var(--text);font-size:.87rem;margin-top:.2rem">6 / 10</div></div>
+              <div><div style="font-size:.67rem;color:var(--muted)">Stockage</div><div style="font-weight:700;color:var(--text);font-size:.87rem;margin-top:.2rem">2,1 / 10 GB</div></div>
+            </div>
+            <div style="font-size:.78rem;color:var(--muted)">Cle : <code style="color:var(--teal)">SP-PRO-2025-XXXX-XXXX</code></div>
+          </div>
+          <div class="sc">
+            <div class="st"><i class="bi bi-check2-all"></i>Fonctionnalites incluses</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.45rem">
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Gestion multi-entrepots</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Point de vente (POS)</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Alertes &amp; notifications</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Rapports avances</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Credits clients</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Sauvegardes auto</div>
+              <div style="display:flex;align-items:center;gap:.45rem;font-size:.82rem;color:var(--subtle)"><i class="bi bi-check-circle-fill" style="color:var(--teal);flex-shrink:0"></i>Support prioritaire</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:.55rem;flex-wrap:wrap">
+            <button class="btn btn-p" onclick="toast('Renouvellement en cours...','info')"><i class="bi bi-arrow-repeat"></i> Renouveler</button>
+            <button class="btn btn-g" onclick="toast('Contact: support@stockpro.bi','info')"><i class="bi bi-headset"></i> Support</button>
+          </div>
+        </div>
+
+        <!-- DANGER -->
+        <div class="tp" id="tp-danger">
+          <div class="sc" style="border-color:rgba(239,68,68,.2)">
+            <div class="st" style="color:var(--red);border-color:rgba(239,68,68,.2)"><i class="bi bi-exclamation-triangle-fill" style="color:var(--red)"></i>Zone de danger</div>
+            <div class="dz"><div class="dt">Reinitialiser les donnees de demonstration</div><div class="dd">Supprime toutes les donnees de test et recharge les donnees d'exemple. Vos parametres seront conserves.</div><button class="btn-d" onclick="toast('Reinitialisation effectuee (demo)','info')"><i class="bi bi-arrow-counterclockwise"></i> Reinitialiser demo</button></div>
+            <div class="dz"><div class="dt">Vider toutes les donnees de stock et ventes</div><div class="dd">Supprime definitvement tous les produits, mouvements, commandes et historiques. <strong style="color:var(--red)">Action irreversible.</strong></div><button class="btn-d" onclick="confirmDanger('VIDER')"><i class="bi bi-trash3-fill"></i> Vider les donnees</button></div>
+            <div class="dz"><div class="dt">Supprimer le compte entreprise</div><div class="dd">Supprime definitvement l'entreprise, tous les utilisateurs, donnees et fichiers associes. <strong style="color:var(--red)">Impossible d'annuler.</strong></div><button class="btn-d" onclick="confirmDanger('SUPPRIMER')"><i class="bi bi-x-octagon-fill"></i> Supprimer le compte</button></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast-stack" id="ts"></div>
+<script>
+function show(id,btn){document.querySelectorAll(".tp").forEach(p=>p.classList.remove("on"));document.querySelectorAll(".sb").forEach(b=>b.classList.remove("on"));document.getElementById("tp-"+id).classList.add("on");btn.classList.add("on");}
+function save(s){toast("Parametres '"+s+"' sauvegardes","success");}
+function setColor(c,el){document.querySelectorAll(".sw2").forEach(s=>s.classList.remove("on"));el.classList.add("on");document.documentElement.style.setProperty("--teal",c);toast("Couleur appliquee","success");}
+function confirmDanger(kw){const i=prompt("Tapez \""+kw+"\" pour confirmer :");if(i===kw)toast("Action effectuee (simulation)","error");else if(i!==null)toast("Confirmation incorrecte","info");}
+function toast(msg,type="success"){const s=document.getElementById("ts");const t=document.createElement("div");t.className="toast "+type;const ic={success:"check-circle-fill",error:"x-circle-fill",info:"info-circle-fill"};const cl={success:"var(--teal)",error:"var(--red)",info:"var(--blue)"};t.innerHTML='<i class="bi bi-'+ic[type]+'" style="color:'+cl[type]+';flex-shrink:0"></i><span>'+msg+"</span>";s.appendChild(t);setTimeout(()=>t.remove(),4000);}
+</script>
+</body>
+</html>
