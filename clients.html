@@ -6,6 +6,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="_shared.css"/>
+<script src="./axios.min.js"></script>
 </head>
 <body>
 <nav class="sidebar">
@@ -114,13 +115,13 @@
     <div class="modal-body">
       <div class="form-row"><div class="form-group"><label class="form-label">Nom / Raison sociale * *</label><input type="text" class="form-control" id="f_nom" placeholder="Nom du client"/></div>
 <div class="form-group"><label class="form-label">Code client</label><input type="text" class="form-control" id="f_code" placeholder="CLI-001"/></div>
-<div class="form-group"><label class="form-label">Type client</label><select class="form-control" id="f_type_client"><option value="">-- Choisir --</option><option value="Entreprise">Entreprise</option><option value="Particulier">Particulier</option><option value="Administration">Administration</option></select></div>
-<div class="form-group"><label class="form-label">Téléphone</label><input type="tel" class="form-control" id="f_tel" placeholder="+257 ..."/></div>
-<div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="f_email" placeholder="client@email.com"/></div>
+<div class="form-group"><label class="form-label">Type client</label><select class="form-control" id="f_adresse"><option value="">-- Choisir --</option><option value="Entreprise">Entreprise</option><option value="Particulier">Particulier</option><option value="Administration">Administration</option></select></div>
+<div class="form-group"><label class="form-label">Téléphone</label><input type="telephone" class="form-control" id="f_telephone" placeholder="+257 ..."/></div>
+<div class="form-group"><label class="form-label">Email</label><input type="nif" class="form-control" id="f_nif" placeholder="client@nif.com"/></div>
 <div class="form-group"><label class="form-label">Adresse</label><input type="text" class="form-control" id="f_adresse" placeholder="Adresse complète..."/></div>
 <div class="form-group"><label class="form-label">NIF (si entreprise)</label><input type="text" class="form-control" id="f_nif" placeholder="Numéro fiscal"/></div>
 <div class="form-group"><label class="form-label">Limite de crédit (BIF)</label><input type="number" class="form-control" id="f_limite_credit" placeholder="0"/></div>
-<div class="form-group"><label class="form-label">Solde dû (BIF)</label><input type="number" class="form-control" id="f_solde_du" placeholder="0"/></div>
+<div class="form-group"><label class="form-label">Solde dû (BIF)</label><input type="number" class="form-control" id="f_rc" placeholder="0"/></div>
 <div class="form-group"><label class="form-label">Statut</label><select class="form-control" id="f_statut"><option value="">-- Choisir --</option><option value="Actif">Actif</option><option value="Inactif">Inactif</option><option value="Bloqué">Bloqué</option></select></div></div>
       <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
@@ -152,15 +153,22 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────
-let DATA = [{"id": 1, "code": "CLI-001", "nom": "SOPHARMA SARL", "type_client": "Entreprise", "tel": "+257 22 30 11 22", "email": "sopharma@sopharma.bi", "solde_du": "3200000", "statut": "Actif"}, {"id": 2, "code": "CLI-002", "nom": "HOREB COMMERCE", "type_client": "Entreprise", "tel": "+257 22 31 44 55", "email": "horeb@horeb.bi", "solde_du": "2800000", "statut": "Actif"}, {"id": 3, "code": "CLI-003", "nom": "Jean Nkurunziza", "type_client": "Particulier", "tel": "+257 79 11 22 33", "email": "jean.nk@gmail.com", "solde_du": "1100000", "statut": "Actif"}, {"id": 4, "code": "CLI-004", "nom": "Marie Kabura", "type_client": "Particulier", "tel": "+257 79 44 55 66", "email": "m.kabura@yahoo.fr", "solde_du": "850000", "statut": "Actif"}, {"id": 5, "code": "CLI-005", "nom": "MAIRIE DE BUJUMBURA", "type_client": "Administration", "tel": "+257 22 22 00 00", "email": "mairie@mairie.bi", "solde_du": "0", "statut": "Actif"}, {"id": 6, "code": "CLI-006", "nom": "LYCÉE SAINT-ESPRIT", "type_client": "Administration", "tel": "+257 22 23 44 55", "email": "lycee@saintesprit.bi", "solde_du": "450000", "statut": "Actif"}, {"id": 7, "code": "CLI-007", "nom": "Patrick Bigirimana", "type_client": "Particulier", "tel": "+257 79 77 88 99", "email": "pat.bigi@gmail.com", "solde_du": "0", "statut": "Bloqué"}];
-let filtered = [...DATA];
+let DATA = [];
 let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
+let endpoint = "http://192.168.1.130:8080/api/clients"
+let filtered = [...DATA];
+
+axios.get(endpoint).then((resp) => {
+  DATA.push(...resp.data)
+  filtered = [...DATA];
+  render()
+})
 
 // ── COLUMNS ──────────────────────────────────────────────────────
-const COLS = [{"key": "code", "label": "Code", "code": true}, {"key": "nom", "label": "Nom / Raison sociale", "main": true}, {"key": "type_client", "label": "Type"}, {"key": "tel", "label": "T\u00e9l\u00e9phone"}, {"key": "email", "label": "Email"}, {"key": "solde_du", "label": "Solde d\u00fb", "money": true}, {"key": "statut", "label": "Statut", "badge": true}];
+const COLS = [{"key": "id", "label": "ID", "id": true}, {"key": "nom", "label": "Nom / Raison sociale", "main": true}, {"key": "adresse", "label": "Type"}, {"key": "telephone", "label": "T\u00e9l\u00e9phone"}, {"key": "nif", "label": "NIF"}, {"key": "rc", "label": "RC", "money": true}, {"key": "statut", "label": "Statut", "badge": true}];
 const REQUIRED = ["nom"];
 
 // ── RENDER ───────────────────────────────────────────────────────
@@ -304,9 +312,6 @@ function toast(msg,type='success'){
   t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
   s.appendChild(t); setTimeout(()=>t.remove(),3500);
 }
-
-// ── INIT ──────────────────────────────────────────────────────────
-render();
 </script>
 </body>
 </html>
