@@ -259,20 +259,19 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
-  const missing=REQUIRED.filter(k=>!document.getElementById('f_'+k)?.value.trim());
-  if(missing.length){
-    document.getElementById('formErrorMsg').textContent='Champs obligatoires manquants: '+missing.join(', ');
-    document.getElementById('formError').classList.add('show'); return;
+  let data = {
+      "nom": document.getElementById("nom").value,
+      "description": document.getElementById("description").value
   }
-  const obj={id: editId||Date.now()};
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) obj[c.key]=el.value.trim()||(c.money?0:''); });
-  if(editId){
-    const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj};
-    toast('Enregistrement mis à jour','success');
-  }else{
-    DATA.unshift(obj); toast('Nouvel enregistrement ajouté','success');
-  }
-  filtered=[...DATA]; closeModal(); render();
+  axios.post(endpoint, data).then((resp) => {
+    console.log("Réponse API:", resp.data);
+    closeModal();
+    render();
+    toast('Enregistré avec succès', 'success');
+  }).catch((err) => {
+    console.error("Erreur:", err);
+    toast('Erreur lors de l\'enregistrement', 'error');
+  });
 }
 
 function askDel(id){
