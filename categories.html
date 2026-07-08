@@ -140,12 +140,19 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────
-let DATA = [{"id": 1, "nom": "Informatique", "parent": "", "produits": "284", "description": "Matériel informatique", "statut": "Actif"}, {"id": 2, "nom": "Fournitures de bureau", "parent": "", "produits": "196", "description": "Papeterie et consommables", "statut": "Actif"}, {"id": 3, "nom": "Électronique", "parent": "", "produits": "152", "description": "Appareils électroniques", "statut": "Actif"}, {"id": 4, "nom": "Mobilier", "parent": "", "produits": "89", "description": "Mobilier de bureau", "statut": "Actif"}, {"id": 5, "nom": "Alimentaire", "parent": "", "produits": "218", "description": "Produits alimentaires", "statut": "Actif"}, {"id": 6, "nom": "Pharmacie", "parent": "", "produits": "127", "description": "Médicaments et santé", "statut": "Actif"}, {"id": 7, "nom": "Câbles & Réseau", "parent": "Informatique", "produits": "64", "description": "Câbles et équipements réseau", "statut": "Actif"}, {"id": 8, "nom": "Imprimantes", "parent": "Informatique", "produits": "38", "description": "Imprimantes et consommables", "statut": "Inactif"}];
-let filtered = [...DATA];
+let DATA = [];
 let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
+let endpoint = "https://api-pds.inganza.bi/api/categories";
+let filtered = [...DATA];
+
+axios.get(endpoint).then((resp) => {
+  DATA.push(...resp.data)
+  filtered = [...DATA];
+  render()
+})
 
 // ── COLUMNS ──────────────────────────────────────────────────────
 const COLS = [{"key": "nom", "label": "Nom", "main": true}, {"key": "parent", "label": "Cat\u00e9gorie parente"}, {"key": "produits", "label": "Nb produits"}, {"key": "description", "label": "Description"}, {"key": "statut", "label": "Statut", "badge": true}];
