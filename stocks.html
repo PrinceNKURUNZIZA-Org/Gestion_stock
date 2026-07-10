@@ -174,12 +174,12 @@ let UTILISATEURS = [];
 
 axios.get("https://api-pds.inganza.bi/api/produits").then(resp => {
   PRODUITS = resp.data;
-  populateSelect('categorie', PRODUITS, 'nom');
+  populateSelect('produit', PRODUITS, 'nom');
 });
 
 axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
   UTILISATEURS = resp.data;
-  populateSelect('categorie', UTILISATEURS, 'nom');
+  populateSelect('utilisateur', UTILISATEURS, 'nom');
 });
 
 function populateSelect(fieldId, items, labelKey) {
