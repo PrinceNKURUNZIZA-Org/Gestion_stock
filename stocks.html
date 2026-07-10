@@ -199,7 +199,6 @@ const COLS = [
   { key: "dateExpiration", label: "Date Expiration" },
   { key: "produit", label: "Produit" },
   { key: "utilisateur", label: "Utilisateur" }
-  
 ];
 const REQUIRED = ["produit", "entrepot"];
 
@@ -305,8 +304,6 @@ function editRow(id) {
   document.getElementById('modal').classList.add('open');
 }
 
-
-
 function viewRow(id) {
   const r=DATA.find(x=>x.id===id);
   toast(Object.values(r).filter(Boolean).join(' · ').substring(0,80),'info');
@@ -336,23 +333,6 @@ function saveRow() {
     : axios.post(endpoint, data);
 
   request.then((resp) => {
-    // ... reste inchangé
-  }).catch((err) => {
-    console.error("Erreur:", err.response?.data || err);
-    toast("Erreur lors de l'enregistrement", 'error');
-  });
-}
-
-  if (!data.dateEntree.trim()) {
-    document.getElementById('formErrorMsg').textContent = "Le champ Date d'entrée est requis.";
-    document.getElementById('formError').classList.add('show');
-    return;
-  }
-const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
-
-  request.then((resp) => {
     if (editId) {
       const idx = DATA.findIndex(x => x.id === editId);
       if (idx !== -1) DATA[idx] = resp.data;
@@ -364,11 +344,10 @@ const request = editId
     render();
     toast('Enregistré avec succès', 'success');
   }).catch((err) => {
-    console.error("Erreur:", err);
+    console.error("Erreur:", err.response?.data || err);
     toast("Erreur lors de l'enregistrement", 'error');
   });
-
-
+}
 
 function askDel(id){
   delId=id;
