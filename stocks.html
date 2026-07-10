@@ -323,8 +323,8 @@ function saveRow() {
     utilisateur: Number(document.getElementById("utilisateur").value),
   };
 
-  if (!data.nom.trim()) {
-    document.getElementById('formErrorMsg').textContent = "Le champ Désignation est requis.";
+  if (!data.produit.trim()) {
+    document.getElementById('formErrorMsg').textContent = "Le champ Produit est requis.";
     document.getElementById('formError').classList.add('show');
     return;
   }
