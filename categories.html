@@ -142,7 +142,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/categories";
+let endpoint = "https://api-pds.inganza.bi/api/categories";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
@@ -152,7 +152,12 @@ axios.get(endpoint).then((resp) => {
 })
 
 // ── COLUMNS ──────────────────────────────────────────────────────
-const COLS = [{"key": "nom", "label": "Nom", "main": true}, {"key": "parent", "label": "Cat\u00e9gorie parente"}, {"key": "produits", "label": "Nb produits"}, {"key": "description", "label": "Description"}, {"key": "statut", "label": "Statut", "badge": true}];
+const COLS = [
+  { key: "id", label: "ID", code: true },
+  { key: "nom", label: "Désignation", main: true },
+  { key: "description", label: "Description" },
+  
+];
 const REQUIRED = ["nom"];
 
 // ── RENDER ───────────────────────────────────────────────────────
