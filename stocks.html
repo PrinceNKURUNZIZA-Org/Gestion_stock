@@ -314,14 +314,34 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
+  const dateEntreeVal = document.getElementById("dateEntree").value;
+
   let data = {
-    dateEntree: document.getElementById("dateEntree").value,
-    quantiteInitiale: document.getElementById("quantiteInitiale").value,
-    quantite: document.getElementById("quantite").value,
+    dateEntree: dateEntreeVal ? new Date(dateEntreeVal).toISOString() : null,
+    quantiteInitiale: Number(document.getElementById("quantiteInitiale").value),
+    quantite: Number(document.getElementById("quantite").value),
     dateExpiration: document.getElementById("dateExpiration").value,
     produit: Number(document.getElementById("produit").value),
     utilisateur: Number(document.getElementById("utilisateur").value),
   };
+
+  if (!data.dateEntree) {
+    document.getElementById('formErrorMsg').textContent = "Le champ Date d'entrée est requis.";
+    document.getElementById('formError').classList.add('show');
+    return;
+  }
+
+  const request = editId
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
+    : axios.post(endpoint, data);
+
+  request.then((resp) => {
+    // ... reste inchangé
+  }).catch((err) => {
+    console.error("Erreur:", err.response?.data || err);
+    toast("Erreur lors de l'enregistrement", 'error');
+  });
+}
 
   if (!data.dateEntree.trim()) {
     document.getElementById('formErrorMsg').textContent = "Le champ Date d'entrée est requis.";
