@@ -323,8 +323,8 @@ function saveRow() {
     utilisateur: Number(document.getElementById("utilisateur").value),
   };
 
-  if (!data.produit.trim()) {
-    document.getElementById('formErrorMsg').textContent = "Le champ Produit est requis.";
+  if (!data.dateEntree.trim()) {
+    document.getElementById('formErrorMsg').textContent = "Le champ Date d'entrée est requis.";
     document.getElementById('formError').classList.add('show');
     return;
   }
