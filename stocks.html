@@ -281,22 +281,32 @@ function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checke
 
 // ── CRUD ──────────────────────────────────────────────────────────
 function openAdd() {
-  editId=null;
-  document.getElementById('modalTitleText').textContent='Nouveau mouvement';
-  document.getElementById('modalTitle').querySelector('i').className='bi bi-arrow-left-right';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) el.value=''; });
+  editId = null;
+  document.getElementById('modalTitleText').textContent = 'Nouveau produit';
+  document.getElementById('modalTitle').querySelector('i').className = 'bi bi-box-seam-fill';
+  COLS.forEach(c => {
+    const el = document.getElementById(c.key);
+    if (el) el.value = '';
+  });
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
+
 function editRow(id) {
-  editId=id;
-  const r=DATA.find(x=>x.id===id);
-  document.getElementById('modalTitleText').textContent='Modifier';
-  document.getElementById('modalTitle').querySelector('i').className='bi bi-pencil';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el&&r[c.key]!==undefined) el.value=r[c.key]; });
+  editId = id;
+  const r = DATA.find(x => x.id === id);
+  document.getElementById('modalTitleText').textContent = 'Modifier';
+  document.getElementById('modalTitle').querySelector('i').className = 'bi bi-pencil';
+  COLS.forEach(c => {
+    const el = document.getElementById(c.key);
+    if (el && r[c.key] !== undefined) el.value = r[c.key];
+  });
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
+
+
+
 function viewRow(id) {
   const r=DATA.find(x=>x.id===id);
   toast(Object.values(r).filter(Boolean).join(' · ').substring(0,80),'info');
@@ -318,6 +328,27 @@ function saveRow() {
     document.getElementById('formError').classList.add('show');
     return;
   }
+const request = editId
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
+    : axios.post(endpoint, data);
+
+  request.then((resp) => {
+    if (editId) {
+      const idx = DATA.findIndex(x => x.id === editId);
+      if (idx !== -1) DATA[idx] = resp.data;
+    } else {
+      DATA.push(resp.data);
+    }
+    filtered = [...DATA];
+    closeModal();
+    render();
+    toast('Enregistré avec succès', 'success');
+  }).catch((err) => {
+    console.error("Erreur:", err);
+    toast("Erreur lors de l'enregistrement", 'error');
+  });
+}
+
 
 function askDel(id){
   delId=id;
