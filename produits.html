@@ -120,8 +120,8 @@
 <div class="form-group"><label class="form-label">Prix Unitaire</label><input type="number" class="form-control" id="prixUnitaire" placeholder="0.00"/></div>
 <div class="form-group"><label class="form-label">Quantites</label><input type="number" class="form-control" id="quantite" placeholder="0"/></div>
 <div class="form-group"><label class="form-label">Date expiration</label><input type="number" class="form-control" id="delais" /></div>
-<div class="form-group"><label class="form-label">Categorie</label><input type="text" class="form-control" id="categorie" /></div>
-<div class="form-group"><label class="form-label">Utilisateur</label><input type="text" class="form-control" id="utilisateur" /></div>
+<div class="form-group"><label class="form-label">Categorie</label><select class="form-control" id="categorie"></select></div>
+<div class="form-group"><label class="form-label">Utilisateur</label><select class="form-control" id="utilisateur"></select></div>
 <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
     <div class="modal-footer">
@@ -166,6 +166,26 @@ axios.get(endpoint).then((resp) => {
   render()
 })
 
+
+let CATEGORIES = [];
+let UTILISATEURS = [];
+
+axios.get("http://localhost:8080/api/categories").then(resp => {
+  CATEGORIES = resp.data;
+  populateSelect('categorie', CATEGORIES, 'nom');
+});
+
+axios.get("http://localhost:8080/api/utilisateurs").then(resp => {
+  UTILISATEURS = resp.data;
+  populateSelect('utilisateur', UTILISATEURS, 'nom'); 
+});
+
+function populateSelect(fieldId, items, labelKey) {
+  const el = document.getElementById(fieldId);
+  if (!el) return;
+  el.innerHTML = '<option value="">-- Sélectionner --</option>' +
+    items.map(it => `<option value="${it.id}">${it[labelKey]}</option>`).join('');
+}
 
 // ── COLUMNS ──────────────────────────────────────────────────────
 const COLS = [
