@@ -6,6 +6,8 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="shared.css"/>
+<script src="./axios.min.js"></script>
+
 </head>
 <body>
 <nav class="sidebar">
@@ -87,14 +89,13 @@
         <table class="data-table" id="mainTable">
           <thead><tr>
             <th style="width:36px;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"/></th>
-            <th>Référence</th>
+            <th>ID</th>
+<th>Date Entrée</th>
+<th>Quantité Initiale</th>
+<th>Quantité</th>
+<th>Date Expiration</th>
 <th>Produit</th>
-<th>Entrepôt</th>
-<th>Zone</th>
-<th>Qté disponible</th>
-<th>Qté réservée</th>
-<th>Valeur stock</th>
-<th>Niveau</th>
+<th>Utilisateur</th>
             <th>Actions</th>
           </tr></thead>
           <tbody id="tbody"></tbody>
@@ -116,13 +117,13 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-row"><div class="form-group"><label class="form-label">Produit * *</label><select class="form-control" id="f_produit"><option value="">-- Choisir --</option><option value="Câble HDMI 2m">Câble HDMI 2m</option><option value="Papier A4">Papier A4</option><option value="Clavier sans fil">Clavier sans fil</option><option value="Écran LCD 24"">Écran LCD 24"</option><option value="Câble RJ45">Câble RJ45</option></select></div>
-<div class="form-group"><label class="form-label">Entrepôt * *</label><select class="form-control" id="f_entrepot"><option value="">-- Choisir --</option><option value="Entrepôt A">Entrepôt A</option><option value="Entrepôt B">Entrepôt B</option><option value="Entrepôt C">Entrepôt C</option></select></div>
-<div class="form-group"><label class="form-label">Zone</label><select class="form-control" id="f_zone"><option value="">-- Choisir --</option><option value="Zone A1">Zone A1</option><option value="Zone A2">Zone A2</option><option value="Zone B1">Zone B1</option><option value="Zone C1">Zone C1</option><option value="Réception">Réception</option></select></div>
-<div class="form-group"><label class="form-label">Type de mouvement</label><select class="form-control" id="f_type_mouvement"><option value="">-- Choisir --</option><option value="Entrée">Entrée</option><option value="Sortie">Sortie</option><option value="Transfert">Transfert</option><option value="Ajustement">Ajustement</option></select></div>
-<div class="form-group"><label class="form-label">Quantité *</label><input type="number" class="form-control" id="f_quantite" placeholder="0"/></div>
-<div class="form-group"><label class="form-label">Référence document</label><input type="text" class="form-control" id="f_reference_doc" placeholder="CMD-XXX, BON-XXX..."/></div>
-<div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" id="f_notes" placeholder="Observations..." rows="2"></textarea></div></div>
+<div class="form-group"><label class="form-label">Date Entree</label><input type="date" class="form-control" id="dateEntree" placeholder="Date d'entrée"/></div>
+<div class="form-group"><label class="form-label">Quantite Initiale</label><input type="number" class="form-control" id="quantiteInitiale" placeholder="Quantite"/></div>
+<div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-control" id="quantite" placeholder="0.00"/></div>
+<div class="form-group"><label class="form-label">Date Expiration</label><input type="date" class="form-control" id="dateExpiration" placeholder="Date d'expiration"/></div>
+<div class="form-group"><label class="form-label">Produit</label><select class="form-control" id="produit"></select></div>
+<div class="form-group"><label class="form-label">Utilisateur</label><select class="form-control" id="utilisateur"></select></div>
+<div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
       <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
     <div class="modal-footer">
@@ -153,15 +154,53 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────
-let DATA = [{"id": 1, "reference": "REF-00124", "produit": "Câble HDMI 2m", "entrepot": "Entrepôt A", "zone": "Zone A1", "qte_disponible": "142", "qte_reservee": "10", "valeur": "781000", "niveau": "Normal"}, {"id": 2, "reference": "REF-00089", "produit": "Imprimante thermique", "entrepot": "Entrepôt B", "zone": "Zone B1", "qte_disponible": "1", "qte_reservee": "0", "valeur": "85000", "niveau": "Critique"}, {"id": 3, "reference": "REF-00211", "produit": "Papier A4 80g", "entrepot": "Entrepôt A", "zone": "Zone A2", "qte_disponible": "8", "qte_reservee": "2", "valeur": "36000", "niveau": "Faible"}, {"id": 4, "reference": "REF-00067", "produit": "Câble RJ45 Cat6", "entrepot": "Entrepôt A", "zone": "Zone A1", "qte_disponible": "3", "qte_reservee": "0", "valeur": "75000", "niveau": "Critique"}, {"id": 5, "reference": "REF-00412", "produit": "Écran LCD 24\"", "entrepot": "Entrepôt A", "zone": "Zone A2", "qte_disponible": "18", "qte_reservee": "3", "valeur": "5040000", "niveau": "Normal"}, {"id": 6, "reference": "REF-00301", "produit": "Clavier sans fil", "entrepot": "Entrepôt B", "zone": "Zone B1", "qte_disponible": "55", "qte_reservee": "5", "valeur": "1210000", "niveau": "Normal"}, {"id": 7, "reference": "REF-00198", "produit": "Stylos bille bleu", "entrepot": "Entrepôt B", "zone": "Zone B2", "qte_disponible": "12", "qte_reservee": "0", "valeur": "36000", "niveau": "Faible"}];
-let filtered = [...DATA];
+let DATA = [];
 let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
+let endpoint = "https://api-pds.inganza.bi/api/stocks";
+let filtered = [...DATA];
+
+axios.get(endpoint).then((resp) => {
+  DATA.push(...resp.data)
+  filtered = [...DATA];
+  render()
+})
+
+
+let PRODUITS = [];
+let UTILISATEURS = [];
+
+axios.get("https://api-pds.inganza.bi/api/produits").then(resp => {
+  PRODUITS = resp.data;
+  populateSelect('categorie', PRODUITS, 'nom');
+});
+
+axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
+  UTILISATEURS = resp.data;
+  populateSelect('categorie', UTILISATEURS, 'nom');
+});
+
+function populateSelect(fieldId, items, labelKey) {
+  const el = document.getElementById(fieldId);
+  if (!el) return;
+  el.innerHTML = '<option value="">-- Sélectionner --</option>' +
+    items.map(it => `<option value="${it.id}">${it[labelKey]}</option>`).join('');
+}
+
 
 // ── COLUMNS ──────────────────────────────────────────────────────
-const COLS = [{"key": "reference", "label": "R\u00e9f\u00e9rence", "code": true}, {"key": "produit", "label": "Produit", "main": true}, {"key": "entrepot", "label": "Entrep\u00f4t"}, {"key": "zone", "label": "Zone"}, {"key": "qte_disponible", "label": "Qt\u00e9 disponible"}, {"key": "qte_reservee", "label": "Qt\u00e9 r\u00e9serv\u00e9e"}, {"key": "valeur", "label": "Valeur stock", "money": true}, {"key": "niveau", "label": "Niveau", "badge": true}];
+const COLS = [
+  { key: "id", label: "ID", code: true },
+  { key: "dateEntree", label: "Date Entree", main: true },
+  { key: "quantiteInitiale", label: "Quantite Initiale" },
+  { key: "quantite", label: "Quantite", money: true },
+  { key: "dateExpiration", label: "Date Expiration" },
+  { key: "produit", label: "Produit" },
+  { key: "utilisateur", label: "Utilisateur" }
+  
+];
 const REQUIRED = ["produit", "entrepot"];
 
 // ── RENDER ───────────────────────────────────────────────────────
@@ -265,21 +304,20 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
-  const missing=REQUIRED.filter(k=>!document.getElementById('f_'+k)?.value.trim());
-  if(missing.length){
-    document.getElementById('formErrorMsg').textContent='Champs obligatoires manquants: '+missing.join(', ');
-    document.getElementById('formError').classList.add('show'); return;
+  let data = {
+    dateEntree: document.getElementById("dateEntree").value,
+    quantiteInitiale: document.getElementById("quantiteInitiale").value,
+    quantite: document.getElementById("quantite").value,
+    dateExpiration: document.getElementById("dateExpiration").value,
+    produit: Number(document.getElementById("produit").value),
+    utilisateur: Number(document.getElementById("utilisateur").value),
+  };
+
+  if (!data.nom.trim()) {
+    document.getElementById('formErrorMsg').textContent = "Le champ Désignation est requis.";
+    document.getElementById('formError').classList.add('show');
+    return;
   }
-  const obj={id: editId||Date.now()};
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) obj[c.key]=el.value.trim()||(c.money?0:''); });
-  if(editId){
-    const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj};
-    toast('Enregistrement mis à jour','success');
-  }else{
-    DATA.unshift(obj); toast('Nouvel enregistrement ajouté','success');
-  }
-  filtered=[...DATA]; closeModal(); render();
-}
 
 function askDel(id){
   delId=id;
