@@ -192,8 +192,8 @@ const COLS = [
   { key: "dateAchat", label: "Date Achat", main: true },
   { key: "quantite", label: "Quantite" },
   { key: "prixTotal", label: "Prix Total", money: true },
-  { key: "produit", label: "Produit" },
-  { key: "fournisseur", label: "Fournisseur" }
+  { key: "produit", label: "Produit", lookup: () => PRODUITS },
+  { key: "fournisseur", label: "Fournisseur", lookup: () => FOURNISSEURS }
  
 ];
 const REQUIRED = ["fournisseur"];
@@ -221,7 +221,12 @@ function render() {
 }
 
 function renderCell(r,c) {
-  const v = r[c.key] ?? '';
+  let v = r[c.key] ?? '';
+  if (c.lookup) {
+    const list = c.lookup();
+    const found = list.find(it => it.id === v || it.id === Number(v));
+    v = found ? found.nom : v;
+  }
   if(c.badge) return `<td>${badgeHtml(v, c.badge)}</td>`;
   if(c.money) return `<td style="font-weight:600;color:var(--text);">${Number(v).toLocaleString('fr-FR')} BIF</td>`;
   if(c.main) return `<td class="td-main">${v}</td>`;
