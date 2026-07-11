@@ -5,6 +5,7 @@
 <title>StockPro – Connexion</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="./axios.min.js"></script>
 <style>
 :root{--dark:#0a0e17;--panel:#111827;--card:#1a2233;--border:#2a3347;--teal:#10d9a0;--blue:#3b82f6;--purple:#8b5cf6;--red:#ef4444;--muted:#6b7280;--text:#f1f5f9;--subtle:#cbd5e1;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -187,10 +188,10 @@ body{min-height:100vh;background:var(--dark);font-family:'Inter',sans-serif;disp
     </div>
 
     <div>
-      <label class="form-label">Adresse email</label>
+      <label class="form-label">Nom d'utilisateur</label>
       <div class="input-wrap">
         <i class="bi bi-envelope ico"></i>
-        <input type="email" id="inp-email" placeholder="admin@entreprise.bi" autocomplete="email"/>
+        <input type="email" id="inp-email" placeholder="caissier" autocomplete="email"/>
       </div>
 
       <label class="form-label">Mot de passe</label>
@@ -240,13 +241,21 @@ function doLogin(){
   if(!e||!p){document.getElementById('alertMsg').textContent='Veuillez remplir tous les champs.';ae.classList.add('show');return;}
   document.getElementById('btnText').style.display='none';
   document.getElementById('spinner').classList.add('show');
-  setTimeout(()=>{
-    const u=USERS.find(x=>x.email===e&&x.pw===p);
+
+  let data = { username: e, password: p };
+  axios.post('https://api-pds.inganza.bi/api/auth/login', data).then((value) => {
+    let token = value.data.token;
+    localStorage.setItem('token', token);
     document.getElementById('btnText').style.display='flex';
     document.getElementById('spinner').classList.remove('show');
-    if(u){window.location.href=u.page;}
-    else{document.getElementById('alertMsg').textContent='Email ou mot de passe incorrect. Utilisez les boutons démo ci-dessous.';ae.classList.add('show');}
-  },1200);
+    window.location.href = "dashboard.html";
+  }).catch(err => {
+    document.getElementById('alertMsg').textContent='Email ou mot de passe incorrect.';
+    ae.classList.add('show');
+  }).finally(() => {
+    document.getElementById('btnText').style.display='flex';
+    document.getElementById('spinner').classList.remove('show');
+  });
 }
 document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 </script>
