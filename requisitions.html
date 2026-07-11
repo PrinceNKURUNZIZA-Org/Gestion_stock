@@ -166,7 +166,7 @@ let UTILISATEURS = [];
 
 axios.get("https://api-pds.inganza.bi/api/stocks").then(resp => {
   STOCKS = resp.data;
-  populateSelect('stock', STOCKS, 'nom');
+  populateSelect('stock', STOCKS, 'id');
 });
 
 axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
