@@ -306,11 +306,12 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
- const dateEntreeVal = document.getElementById("dateAchat").value;
+  const dateAchatVal = document.getElementById("dateAchat").value;
+
   let data = {
-    dateEntree: dateEntreeVal ? new Date(dateEntreeVal).toISOString() : null,
-    quantite: document.getElementById("quantite").value,
-    prixTotal: document.getElementById("prixTotal").value,
+    dateAchat: dateAchatVal ? new Date(dateAchatVal).toISOString() : null,
+    quantite: Number(document.getElementById("quantite").value),
+    prixTotal: document.getElementById("prixTotal").value, 
     produit: Number(document.getElementById("produit").value),
     fournisseur: Number(document.getElementById("fournisseur").value),
   };
