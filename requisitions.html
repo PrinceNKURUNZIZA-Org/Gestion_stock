@@ -6,6 +6,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="shared.css"/>
+<script src="./axios.min.js"></script>
 </head>
 <body>
 <nav class="sidebar">
@@ -84,13 +85,11 @@
         <table class="data-table" id="mainTable">
           <thead><tr>
             <th style="width:36px;"><input type="checkbox" id="chkAll" onchange="toggleAll(this)"/></th>
-            <th>N° Réquis.</th>
-<th>Demandeur</th>
-<th>Département</th>
-<th>Produits</th>
-<th>Urgence</th>
-<th>Date besoin</th>
-<th>Statut</th>
+             <th>ID</th>
+            <th>Date</th>
+            <th>Quantité</th>
+            <th>Stock</th>
+            <th>Utilisateur</th>
             <th>Actions</th>
           </tr></thead>
           <tbody id="tbody"></tbody>
@@ -112,13 +111,11 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-row"><div class="form-group"><label class="form-label">Demandeur * *</label><input type="text" class="form-control" id="f_demandeur" placeholder="Nom du demandeur"/></div>
-<div class="form-group"><label class="form-label">Département * *</label><select class="form-control" id="f_departement"><option value="">-- Choisir --</option><option value="Direction">Direction</option><option value="Comptabilité">Comptabilité</option><option value="Magasin">Magasin</option><option value="Commercial">Commercial</option><option value="IT">IT</option><option value="RH">RH</option></select></div>
-<div class="form-group"><label class="form-label">Produits demandés</label><textarea class="form-control" id="f_produits" placeholder="Liste des produits..." rows="2"></textarea></div>
-<div class="form-group"><label class="form-label">Niveau d'urgence</label><select class="form-control" id="f_urgence"><option value="">-- Choisir --</option><option value="Normal">Normal</option><option value="Urgent">Urgent</option><option value="Très urgent">Très urgent</option></select></div>
-<div class="form-group"><label class="form-label">Date de besoin</label><input type="date" class="form-control" id="f_date_besoin" placeholder=""/></div>
-<div class="form-group"><label class="form-label">Justification</label><textarea class="form-control" id="f_justification" placeholder="Motif de la demande..." rows="2"></textarea></div>
-<div class="form-group"><label class="form-label">Statut</label><select class="form-control" id="f_statut"><option value="">-- Choisir --</option><option value="Brouillon">Brouillon</option><option value="En attente">En attente</option><option value="Validée">Validée</option><option value="Rejetée">Rejetée</option></select></div></div>
+
+      <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-control" id="quantite"/></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-control" id="date" placeholder=" "/></div>
+      <div class="form-group"><label class="form-label">Stock</label><select class="form-control" id="stock"></select></div>
+      <div class="form-group"><label class="form-label">Utilisateur</label><select class="form-control" id="utilisateur"></select></div>
       <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
     <div class="modal-footer">
@@ -149,15 +146,50 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────
-let DATA = [{"id": 1, "numero": "REQ-0045", "demandeur": "Marie Niyonzima", "departement": "Magasin", "produits": "5 lignes", "urgence": "Normal", "date_besoin": "2025-06-20", "statut": "En attente"}, {"id": 2, "numero": "REQ-0044", "demandeur": "Pierre Ndayisenga", "departement": "Comptabilité", "produits": "3 lignes", "urgence": "Urgent", "date_besoin": "2025-06-15", "statut": "Validée"}, {"id": 3, "numero": "REQ-0043", "demandeur": "Admin Système", "departement": "IT", "produits": "2 lignes", "urgence": "Normal", "date_besoin": "2025-06-25", "statut": "Brouillon"}, {"id": 4, "numero": "REQ-0042", "demandeur": "Jean Hakizimana", "departement": "Magasin", "produits": "7 lignes", "urgence": "Très urgent", "date_besoin": "2025-06-10", "statut": "Rejetée"}];
-let filtered = [...DATA];
+let DATA = [];
 let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
+let endpoint = "https://api-pds.inganza.bi/api/requisitions";
+let filtered = [...DATA];
+
+axios.get(endpoint).then((resp) => {
+  DATA.push(...resp.data)
+  filtered = [...DATA];
+  render()
+})
+
+
+let STOCKS = [];
+let UTILISATEURS = [];
+
+axios.get("https://api-pds.inganza.bi/api/stocks").then(resp => {
+  STOCKS = resp.data;
+  populateSelect('stock', STOCKS, 'nom');
+});
+
+axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
+  UTILISATEURS = resp.data;
+  populateSelect('utilisateur', UTILISATEURS, 'nom');
+});
+
+function populateSelect(fieldId, items, labelKey) {
+  const el = document.getElementById(fieldId);
+  if (!el) return;
+  el.innerHTML = '<option value="">-- Sélectionner --</option>' +
+    items.map(it => `<option value="${it.id}">${it[labelKey]}</option>`).join('');
+}
 
 // ── COLUMNS ──────────────────────────────────────────────────────
-const COLS = [{"key": "numero", "label": "N\u00b0 R\u00e9quis.", "code": true}, {"key": "demandeur", "label": "Demandeur", "main": true}, {"key": "departement", "label": "D\u00e9partement"}, {"key": "produits", "label": "Produits"}, {"key": "urgence", "label": "Urgence"}, {"key": "date_besoin", "label": "Date besoin"}, {"key": "statut", "label": "Statut", "badge": true}];
+const COLS = [
+  { key: "id", label: "ID", code: true },
+  { key: "quantite", label: "Quantite", main: true },
+  { key: "date", label: "Date" },
+  { key: "stock", label: "Stock", money: true },
+  { key: "utilisateur", label: "utilisateur" }
+  
+];
 const REQUIRED = ["demandeur", "departement"];
 
 // ── RENDER ───────────────────────────────────────────────────────
@@ -238,19 +270,26 @@ function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checke
 
 // ── CRUD ──────────────────────────────────────────────────────────
 function openAdd() {
-  editId=null;
-  document.getElementById('modalTitleText').textContent='Nouvelle réquisition';
-  document.getElementById('modalTitle').querySelector('i').className='bi bi-clipboard2-plus-fill';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) el.value=''; });
+  editId = null;
+  document.getElementById('modalTitleText').textContent = 'Nouvelle réquisition';
+  document.getElementById('modalTitle').querySelector('i').className = 'bi bi-box-seam-fill';
+  COLS.forEach(c => {
+    const el = document.getElementById(c.key);
+    if (el) el.value = '';
+  });
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
+
 function editRow(id) {
-  editId=id;
-  const r=DATA.find(x=>x.id===id);
-  document.getElementById('modalTitleText').textContent='Modifier';
-  document.getElementById('modalTitle').querySelector('i').className='bi bi-pencil';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el&&r[c.key]!==undefined) el.value=r[c.key]; });
+  editId = id;
+  const r = DATA.find(x => x.id === id);
+  document.getElementById('modalTitleText').textContent = 'Modifier';
+  document.getElementById('modalTitle').querySelector('i').className = 'bi bi-pencil';
+  COLS.forEach(c => {
+    const el = document.getElementById(c.key);
+    if (el && r[c.key] !== undefined) el.value = r[c.key];
+  });
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
@@ -261,22 +300,41 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
-  const missing=REQUIRED.filter(k=>!document.getElementById('f_'+k)?.value.trim());
-  if(missing.length){
-    document.getElementById('formErrorMsg').textContent='Champs obligatoires manquants: '+missing.join(', ');
-    document.getElementById('formError').classList.add('show'); return;
-  }
-  const obj={id: editId||Date.now()};
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) obj[c.key]=el.value.trim()||(c.money?0:''); });
-  if(editId){
-    const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj};
-    toast('Enregistrement mis à jour','success');
-  }else{
-    DATA.unshift(obj); toast('Nouvel enregistrement ajouté','success');
-  }
-  filtered=[...DATA]; closeModal(); render();
-}
+  const dateEntreeVal = document.getElementById("dateEntree").value;
 
+  let data = {
+     quantite: Number(document.getElementById("quantite").value),
+    date: dateEntreeVal ? new Date(dateEntreeVal).toISOString() : null,
+   stock: Number(document.getElementById("stock").value),
+    utilisateur: Number(document.getElementById("utilisateur").value),
+  };
+
+  if (!data.quantite) {
+    document.getElementById('formErrorMsg').textContent = "Le champ Quantité est requis.";
+    document.getElementById('formError').classList.add('show');
+    return;
+  }
+
+  const request = editId
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
+    : axios.post(endpoint, data);
+
+  request.then((resp) => {
+    if (editId) {
+      const idx = DATA.findIndex(x => x.id === editId);
+      if (idx !== -1) DATA[idx] = resp.data;
+    } else {
+      DATA.push(resp.data);
+    }
+    filtered = [...DATA];
+    closeModal();
+    render();
+    toast('Enregistré avec succès', 'success');
+  }).catch((err) => {
+    console.error("Erreur:", err.response?.data || err);
+    toast("Erreur lors de l'enregistrement", 'error');
+  });
+}
 function askDel(id){
   delId=id;
   const r=DATA.find(x=>x.id===id);
