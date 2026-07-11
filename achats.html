@@ -316,7 +316,7 @@ function saveRow() {
     fournisseur: Number(document.getElementById("fournisseur").value),
   };
 
-  if (!data.dateAchatVal) {
+  if (!data.dateAchat) {
     document.getElementById('formErrorMsg').textContent = "Le champ Date d'achat est requis.";
     document.getElementById('formError').classList.add('show');
     return;
