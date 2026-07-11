@@ -174,7 +174,7 @@ axios.get("https://api-pds.inganza.bi/api/produits").then(resp => {
   populateSelect('produit', PRODUITS, 'nom');
 });
 
-axios.get("https://api-pds.inganza.bi/api/fournisseur").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/fournisseurs").then(resp => {
   FOURNISSEURS = resp.data;
   populateSelect('fournisseur', FOURNISSEURS, 'nom');
 });
