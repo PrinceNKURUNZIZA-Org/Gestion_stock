@@ -306,17 +306,16 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
- 
+ const dateEntreeVal = document.getElementById("dateAchat").value;
   let data = {
-    
-    dateAchat: document.getElementById("dateAchat").value,
+    dateEntree: dateEntreeVal ? new Date(dateEntreeVal).toISOString() : null,
     quantite: document.getElementById("quantite").value,
     prixTotal: document.getElementById("prixTotal").value,
     produit: Number(document.getElementById("produit").value),
     fournisseur: Number(document.getElementById("fournisseur").value),
   };
 
-  if (!data.dateAchat) {
+  if (!data.dateEntreeVal) {
     document.getElementById('formErrorMsg').textContent = "Le champ Date d'achat est requis.";
     document.getElementById('formError').classList.add('show');
     return;
