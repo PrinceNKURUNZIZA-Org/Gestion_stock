@@ -311,32 +311,24 @@ function saveRow() {
   let data = {
     dateAchat: dateAchatVal ? new Date(dateAchatVal).toISOString() : null,
     quantite: Number(document.getElementById("quantite").value),
-    prixTotal: document.getElementById("prixTotal").value, 
+    prixTotal: document.getElementById("prixTotal").value,
     produit: Number(document.getElementById("produit").value),
     fournisseur: Number(document.getElementById("fournisseur").value),
   };
 
-  if (!data.dateAchat) {
+  if (!data.dateAchat) {   
     document.getElementById('formErrorMsg').textContent = "Le champ Date d'achat est requis.";
     document.getElementById('formError').classList.add('show');
     return;
   }
+  document.getElementById('formError').classList.remove('show');
 
   const request = editId
     ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
     : axios.post(endpoint, data);
 
   request.then((resp) => {
-    if (editId) {
-      const idx = DATA.findIndex(x => x.id === editId);
-      if (idx !== -1) DATA[idx] = resp.data;
-    } else {
-      DATA.push(resp.data);
-    }
-    filtered = [...DATA];
-    closeModal();
-    render();
-    toast('Enregistré avec succès', 'success');
+    // ...
   }).catch((err) => {
     console.error("Erreur:", err.response?.data || err);
     toast("Erreur lors de l'enregistrement", 'error');
