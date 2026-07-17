@@ -329,11 +329,18 @@ function askDel(id){
 }
 function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
 function confirmDel(){
-  DATA=DATA.filter(x=>x.id!==delId);
-  filtered=[...DATA]; closeDelModal(); render();
-  toast('Enregistrement supprimé','error');
+  axios.delete(`${endpoint}/${delId}`).then(() => {
+    DATA = DATA.filter(x => x.id !== delId);
+    filtered = [...DATA];
+    closeDelModal();
+    render();
+    toast('Enregistrement supprimé', 'error');
+  }).catch((err) => {
+    console.error("Erreur:", err.response?.data || err);
+    closeDelModal();
+    toast("Erreur lors de la suppression", 'error');
+  });
 }
-
 function exportCSV(){toast('Export CSV en cours...','info');}
 
 // ── TOAST ─────────────────────────────────────────────────────────
