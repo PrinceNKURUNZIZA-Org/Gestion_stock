@@ -6,6 +6,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="shared.css"/>
+<script src="./axios.min.js"></script>
 <style>
 /* POS layout override */
 body { overflow: hidden; }
@@ -218,15 +219,9 @@ body { overflow: hidden; }
         <div style="font-size:.75rem;color:var(--muted);white-space:nowrap;"><i class="bi bi-upc-scan" style="margin-right:.3rem;"></i>Code-barres</div>
       </div>
 
-      <!-- Category tabs -->
-      <div class="cat-tabs">
+      <!-- Category tabs (générés dynamiquement depuis l'API) -->
+      <div class="cat-tabs" id="catTabs">
         <button class="cat-tab active" onclick="setcat('',this)">Tous</button>
-        <button class="cat-tab" onclick="setcat('Informatique',this)">🖥 Informatique</button>
-        <button class="cat-tab" onclick="setcat('Fournitures',this)">📎 Fournitures</button>
-        <button class="cat-tab" onclick="setcat('Électronique',this)">📱 Électronique</button>
-        <button class="cat-tab" onclick="setcat('Mobilier',this)">🪑 Mobilier</button>
-        <button class="cat-tab" onclick="setcat('Alimentaire',this)">🍎 Alimentaire</button>
-        <button class="cat-tab" onclick="setcat('Pharmacie',this)">💊 Pharmacie</button>
       </div>
 
       <!-- Products grid -->
@@ -336,33 +331,60 @@ body { overflow: hidden; }
 <div class="pos-toast" id="posToastStack"></div>
 
 <script>
-// ── PRODUCTS ──────────────────────────────────────────────────────
-const PRODUCTS = [
-  {id:1,ref:'REF-00124',name:'Câble HDMI 2m',cat:'Informatique',price:5500,stock:142,icon:'🔌',tva:18},
-  {id:2,ref:'REF-00089',name:'Imprimante thermique',cat:'Informatique',price:120000,stock:1,icon:'🖨️',tva:18},
-  {id:3,ref:'REF-00211',name:'Papier A4 80g (rame)',cat:'Fournitures',price:6000,stock:8,icon:'📄',tva:10},
-  {id:4,ref:'REF-00345',name:'Chaise ergonomique',cat:'Mobilier',price:180000,stock:34,icon:'🪑',tva:18},
-  {id:5,ref:'REF-00067',name:'Câble RJ45 Cat6 100m',cat:'Informatique',price:38000,stock:3,icon:'🌐',tva:18},
-  {id:6,ref:'REF-00198',name:'Stylos bille bleu (bte)',cat:'Fournitures',price:4500,stock:12,icon:'✒️',tva:10},
-  {id:7,ref:'REF-00412',name:'Écran LCD 24"',cat:'Électronique',price:380000,stock:18,icon:'🖥️',tva:18},
-  {id:8,ref:'REF-00512',name:'Table de réunion 8P',cat:'Mobilier',price:900000,stock:4,icon:'🪵',tva:18},
-  {id:9,ref:'REF-00274',name:'Agrafe Rapid 23/6 (bte)',cat:'Fournitures',price:2000,stock:5,icon:'📌',tva:10},
-  {id:10,ref:'REF-00301',name:'Clavier sans fil',cat:'Informatique',price:32000,stock:55,icon:'⌨️',tva:18},
-  {id:11,ref:'REF-00501',name:'Souris optique USB',cat:'Informatique',price:12000,stock:40,icon:'🖱️',tva:18},
-  {id:12,ref:'REF-00601',name:'Sérum physio 500ml',cat:'Pharmacie',price:3800,stock:48,icon:'💉',tva:0},
-  {id:13,ref:'REF-00714',name:'Gel antiseptique 1L',cat:'Pharmacie',price:6000,stock:12,icon:'🧴',tva:0},
-  {id:14,ref:'REF-00801',name:'Lait en poudre 2kg',cat:'Alimentaire',price:14500,stock:24,icon:'🥛',tva:10},
-  {id:15,ref:'REF-00901',name:'Biscuits LU 250g',cat:'Alimentaire',price:3200,stock:60,icon:'🍪',tva:10},
-  {id:16,ref:'REF-01001',name:'Lampe LED bureau',cat:'Électronique',price:18000,stock:22,icon:'💡',tva:18},
-  {id:17,ref:'REF-01101',name:'Classeur A4 80mm',cat:'Fournitures',price:2500,stock:0,icon:'📁',tva:10},
-  {id:18,ref:'REF-01201',name:'Disque dur externe 1TB',cat:'Informatique',price:95000,stock:8,icon:'💾',tva:18},
-];
-
+// ── STATE ─────────────────────────────────────────────────────────
+let PRODUCTS = [];
+let CATEGORIES = [];
 let cart = {};
-let filteredProds = [...PRODUCTS];
+let filteredProds = [];
 let currentCat = '';
 let selectedPayMethod = 'Espèces';
 let lastSale = null;
+let endpointProduits = "http://localhost:8080/api/produits";
+let endpointCategories = "http://localhost:8080/api/categories";
+
+// Icônes par nom de catégorie — ajoute une entrée si tu crées de nouvelles catégories
+const CAT_ICONS = {
+  'Informatique': '🖥️', 'Fournitures': '📎', 'Électronique': '📱',
+  'Mobilier': '🪑', 'Alimentaire': '🍎', 'Pharmacie': '💊'
+};
+const DEFAULT_ICON = '📦';
+
+// ── CHARGEMENT DES DONNÉES ────────────────────────────────────────
+axios.get(endpointCategories).then(resp => {
+  CATEGORIES = resp.data;
+  buildCategoryTabs();
+  return axios.get(endpointProduits);
+}).then(resp => {
+  PRODUCTS = resp.data.map(mapProduit);
+  filteredProds = [...PRODUCTS];
+  renderProds();
+}).catch(err => {
+  console.error("Erreur chargement:", err.response?.data || err);
+  posToast("Erreur lors du chargement des produits", 'error');
+});
+
+function mapProduit(p){
+  const cat = CATEGORIES.find(c => c.id === p.categorie || c.id === Number(p.categorie));
+  const catNom = cat ? cat.nom : 'Autre';
+  return {
+    id: p.id,
+    ref: 'REF-' + String(p.id).padStart(5,'0'),
+    name: p.nom,
+    cat: catNom,
+    price: Number(p.prixUnitaire) || 0,
+    stock: Number(p.quantite) || 0,
+    icon: CAT_ICONS[catNom] || DEFAULT_ICON,
+    tva: 18 // ajuste ici si un jour ton API renvoie un taux de TVA par produit
+  };
+}
+
+function buildCategoryTabs(){
+  const wrap = document.getElementById('catTabs');
+  wrap.innerHTML = `<button class="cat-tab active" onclick="setcat('',this)">Tous</button>` +
+    CATEGORIES.map(c =>
+      `<button class="cat-tab" onclick="setcat('${c.nom}',this)">${CAT_ICONS[c.nom] || DEFAULT_ICON} ${c.nom}</button>`
+    ).join('');
+}
 
 // ── TIME ──────────────────────────────────────────────────────────
 function updateTime(){
@@ -373,6 +395,10 @@ setInterval(updateTime,1000); updateTime();
 // ── RENDER PRODUCTS ───────────────────────────────────────────────
 function renderProds(){
   const grid = document.getElementById('prodGrid');
+  if(!filteredProds.length){
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:2rem;">Aucun produit trouvé</div>`;
+    return;
+  }
   grid.innerHTML = filteredProds.map(p => {
     const out = p.stock === 0;
     const low = p.stock > 0 && p.stock <= 5;
@@ -446,7 +472,6 @@ function renderCart(){
   }
   empty.style.display='none';
 
-  // Remove old items
   [...container.querySelectorAll('.cart-item')].forEach(e=>e.remove());
 
   items.forEach(([id,{prod,qty}]) => {
@@ -474,8 +499,7 @@ function renderCart(){
 function getSubHT(){
   return Object.values(cart).reduce((s,{prod,qty})=>s+(prod.price*qty),0);
 }
-function getTVA(base){
-  // weighted TVA per item
+function getTVA(){
   return Object.values(cart).reduce((s,{prod,qty})=>s+(prod.price*qty*prod.tva/100),0);
 }
 
@@ -485,7 +509,7 @@ function recalc(){
   const discType = document.getElementById('discountType').value;
   const discount = discType==='pct' ? subHT*discVal/100 : Math.min(discVal,subHT);
   const base = subHT - discount;
-  const tva = getTVA(base);
+  const tva = getTVA();
   const total = base + tva;
 
   document.getElementById('subHT').textContent = fmt(subHT);
@@ -534,23 +558,57 @@ function setExact(){
 
 function processPayment(){
   if(!Object.keys(cart).length) return;
+
   const subHT = getSubHT();
   const total = parseFmt(document.getElementById('totalTTC').textContent);
   const given = +document.getElementById('amountGiven').value || total;
   const client = document.getElementById('selClient').options[document.getElementById('selClient').selectedIndex].text;
   const num = 'VTE-' + String(Math.floor(Math.random()*9000)+1000);
+  const soldItems = Object.values(cart).map(({prod,qty})=>({name:prod.name,qty,price:prod.price,total:prod.price*qty}));
+  const cartSnapshot = Object.entries(cart).map(([id,{prod,qty}]) => ({id:Number(id), prod, qty}));
 
-  lastSale = {
-    num, client, date: new Date().toLocaleString('fr-FR'),
-    method: selectedPayMethod,
-    items: Object.values(cart).map(({prod,qty})=>({name:prod.name,qty,price:prod.price,total:prod.price*qty})),
-    subHT, total, given, change: given-total
+  document.getElementById('btnPay').disabled = true;
+
+  // Décrémente le stock de chaque produit vendu côté serveur
+  const updates = cartSnapshot.map(({id, prod, qty}) => {
+    const newQty = prod.stock - qty;
+    return axios.put(`${endpointProduits}/${id}`, { id, ...produitPayload(prod), quantite: newQty });
+  });
+
+  Promise.all(updates).then(() => {
+    // Met à jour le stock local pour un affichage immédiat
+    cartSnapshot.forEach(({id, qty}) => {
+      const p = PRODUCTS.find(x => x.id === id);
+      if (p) p.stock -= qty;
+    });
+
+    lastSale = {
+      num, client, date: new Date().toLocaleString('fr-FR'),
+      method: selectedPayMethod,
+      items: soldItems,
+      subHT, total, given, change: given-total
+    };
+
+    buildReceipt(lastSale);
+    document.getElementById('receiptModal').classList.add('open');
+    posToast(`Vente ${num} encaissée — ${fmt(total)}`,'success');
+    clearCart();
+    filterProds(document.getElementById('prodSearch').value); // rafraîchit l'affichage avec le nouveau stock
+  }).catch(err => {
+    console.error("Erreur mise à jour stock:", err.response?.data || err);
+    posToast("Erreur lors de la mise à jour du stock — vente annulée", 'error');
+  }).finally(() => {
+    updatePayBtn();
+  });
+}
+
+
+function produitPayload(prod){
+  return {
+    nom: prod.name,
+    prixUnitaire: prod.price
+
   };
-
-  buildReceipt(lastSale);
-  document.getElementById('receiptModal').classList.add('open');
-  posToast(`Vente ${num} encaissée — ${fmt(total)}`,'success');
-  clearCart();
 }
 
 function buildReceipt(s){
@@ -595,8 +653,7 @@ function posToast(msg, type='success'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-renderProds();
-renderCart();
+renderCart(); // renderProds() se déclenche automatiquement une fois les données chargées
 </script>
 </body>
 </html>
