@@ -143,7 +143,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/categories";
+let endpoint = "http://localhost:8080/api/categories";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
@@ -242,7 +242,8 @@ function openAdd() {
   editId=null;
   document.getElementById('modalTitleText').textContent='Nouvelle catégorie';
   document.getElementById('modalTitle').querySelector('i').className='bi bi-tag-fill';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el) el.value=''; });
+  document.getElementById('nom').value='';
+  document.getElementById('description').value='';
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
@@ -251,7 +252,8 @@ function editRow(id) {
   const r=DATA.find(x=>x.id===id);
   document.getElementById('modalTitleText').textContent='Modifier';
   document.getElementById('modalTitle').querySelector('i').className='bi bi-pencil';
-  COLS.forEach(c=>{ const el=document.getElementById('f_'+c.key); if(el&&r[c.key]!==undefined) el.value=r[c.key]; });
+  document.getElementById('nom').value = r.nom ?? '';
+  document.getElementById('description').value = r.description ?? '';
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
@@ -266,28 +268,77 @@ function saveRow() {
       "nom": document.getElementById("nom").value,
       "description": document.getElementById("description").value
   }
-  axios.post(endpoint, data).then((resp) => {
-    console.log("Réponse API:", resp.data);
-    closeModal();
-    render();
-    toast('Enregistré avec succès', 'success');
-  }).catch((err) => {
-    console.error("Erreur:", err);
-    toast('Erreur lors de l\'enregistrement', 'error');
-  });
+
+  // Validation simple du champ requis
+  if(!data.nom) {
+    document.getElementById('formErrorMsg').textContent = 'Le nom est obligatoire';
+    document.getElementById('formError').classList.add('show');
+    return;
+  }
+  document.getElementById('formError').classList.remove('show');
+
+  if(editId) {
+    // MODIFICATION → PUT /api/categories/{id}
+    axios.put(`${endpoint}/${editId}`, data).then((resp) => {
+      console.log("Réponse API:", resp.data);
+      const idx = DATA.findIndex(x=>x.id===editId);
+      if(idx!==-1) DATA[idx] = { ...DATA[idx], ...data };
+      filtered=[...DATA];
+      closeModal();
+      render();
+      toast('Catégorie modifiée avec succès', 'success');
+    }).catch((err) => {
+      console.error("Erreur:", err);
+      toast("Erreur lors de la modification", 'error');
+    });
+  } else {
+    // AJOUT → POST /api/categories
+    axios.post(endpoint, data).then((resp) => {
+      console.log("Réponse API:", resp.data);
+      DATA.push(resp.data);
+      filtered=[...DATA];
+      closeModal();
+      render();
+      toast('Enregistré avec succès', 'success');
+    }).catch((err) => {
+      console.error("Erreur:", err);
+      toast('Erreur lors de l\'enregistrement', 'error');
+    });
+  }
 }
 
 function askDel(id){
-  delId=id;
   const r=DATA.find(x=>x.id===id);
-  document.getElementById('delName').textContent=Object.values(r).slice(1,3).filter(Boolean).join(' – ');
-  document.getElementById('delModal').classList.add('open');
+  if(!r){
+    toast('Erreur: catégorie introuvable', 'error');
+    return;
+  }
+  const label = Object.values(r).slice(1,3).filter(Boolean).join(' – ');
+  if(confirm(`Voulez-vous vraiment supprimer "${label}" ? Cette action est irréversible.`)){
+    delId=id;
+    confirmDel();
+  }
 }
-function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
+function closeDelModal(){
+  const delModalEl = document.getElementById('delModal');
+  delModalEl.classList.remove('open');
+  delModalEl.style.display='none';
+}
 function confirmDel(){
-  DATA=DATA.filter(x=>x.id!==delId);
-  filtered=[...DATA]; closeDelModal(); render();
-  toast('Enregistrement supprimé','error');
+  console.log("Suppression de l'ID:", delId, "URL:", `${endpoint}/${delId}`);
+  // SUPPRESSION → DELETE /api/categories/{id}
+  axios.delete(`${endpoint}/${delId}`).then((resp) => {
+    console.log("Réponse API (succès):", resp.status, resp.data);
+    DATA=DATA.filter(x=>x.id!==delId);
+    filtered=[...DATA];
+    closeDelModal();
+    render();
+    toast('Enregistrement supprimé','error');
+  }).catch((err) => {
+    console.error("Erreur suppression - statut:", err.response?.status, "message:", err.response?.data || err.message);
+    toast(`Erreur lors de la suppression (${err.response?.status || 'réseau'})`, 'error');
+    closeDelModal();
+  });
 }
 
 function exportCSV(){toast('Export CSV en cours...','info');}
