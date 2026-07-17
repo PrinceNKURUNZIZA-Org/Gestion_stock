@@ -288,7 +288,13 @@ function editRow(id) {
   document.getElementById('modalTitle').querySelector('i').className = 'bi bi-pencil';
   COLS.forEach(c => {
     const el = document.getElementById(c.key);
-    if (el && r[c.key] !== undefined) el.value = r[c.key];
+    if (el && r[c.key] !== undefined && r[c.key] !== null) {
+      if (c.key === 'date' && el.type === 'date') {
+        el.value = String(r[c.key]).substring(0, 10); // garde juste YYYY-MM-DD
+      } else {
+        el.value = r[c.key];
+      }
+    }
   });
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
@@ -343,11 +349,18 @@ function askDel(id){
 }
 function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
 function confirmDel(){
-  DATA=DATA.filter(x=>x.id!==delId);
-  filtered=[...DATA]; closeDelModal(); render();
-  toast('Enregistrement supprimé','error');
+  axios.delete(`${endpoint}/${delId}`).then(() => {
+    DATA = DATA.filter(x => x.id !== delId);
+    filtered = [...DATA];
+    closeDelModal();
+    render();
+    toast('Enregistrement supprimé', 'error');
+  }).catch((err) => {
+    console.error("Erreur:", err.response?.data || err);
+    closeDelModal();
+    toast("Erreur lors de la suppression", 'error');
+  });
 }
-
 function exportCSV(){toast('Export CSV en cours...','info');}
 
 // ── TOAST ─────────────────────────────────────────────────────────
