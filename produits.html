@@ -173,9 +173,13 @@ axios.get(endpoint, { headers }).then((resp) => {
 })
 
 let CATEGORIES = [];
-axios.get("https://api-pds.inganza.bi/api/categories").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/categories", { headers }).then(resp => {
   CATEGORIES = resp.data;
   populateSelect('categorie', CATEGORIES, 'nom');
+}).catch((err) => {
+  if (err.status == 401) {
+    window.location.href = "login.html"
+  }
 });
 
 function populateSelect(fieldId, items, labelKey) {
