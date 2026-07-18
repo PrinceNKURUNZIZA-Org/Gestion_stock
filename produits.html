@@ -172,8 +172,11 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 
-
-
+let CATEGORIES = [];
+axios.get("https://api-pds.inganza.bi/api/categories").then(resp => {
+  CATEGORIES = resp.data;
+  populateSelect('categorie', CATEGORIES, 'nom');
+});
 
 function populateSelect(fieldId, items, labelKey) {
   const el = document.getElementById(fieldId);
