@@ -174,9 +174,13 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 let PRODUITS = [];
-axios.get("https://api-pds.inganza.bi/api/produits").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/produits", { headers }).then(resp => {
   PRODUITS = resp.data;
   populateSelect('produit', PRODUITS, 'nom');
+}).catch((err) => {
+  if (err.status == 401) {
+    window.location.href = "login.html"
+  }
 });
 
 
