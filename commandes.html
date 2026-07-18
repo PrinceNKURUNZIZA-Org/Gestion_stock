@@ -162,18 +162,7 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 
-let CLIENTS = [];
-let UTILISATEURS = [];
 
-axios.get("https://api-pds.inganza.bi/api/clients").then(resp => {
-  CLIENTS = resp.data;
-  populateSelect('client', CLIENTS, 'nom');
-}).catch((err) => console.error("Erreur chargement clients:", err.response?.data || err));
-
-axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
-  UTILISATEURS = resp.data;
-  populateSelect('utilisateur', UTILISATEURS, (u) => `${u.nom} ${u.prenom}`);
-}).catch((err) => console.error("Erreur chargement utilisateurs:", err.response?.data || err));
 
 function populateSelect(fieldId, items, labelKeyOrFn) {
   const el = document.getElementById(fieldId);
@@ -281,7 +270,7 @@ function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checke
 // ── CRUD ──────────────────────────────────────────────────────────
 function openAdd() {
   editId = null;
-  document.getElementById('modalTitleText').textContent = 'Nouvelle commande';
+  
   document.getElementById('modalTitle').querySelector('i').className = 'bi bi-cart-plus-fill';
   document.getElementById('date').value = '';
   document.getElementById('total').value = '';
