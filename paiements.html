@@ -163,7 +163,12 @@ let COMMANDES = [];
 axios.get("http://192.168.1.130:8080/api/commandes").then(resp => {
   COMMANDES = resp.data;
   populateCommandeSelect();
-}).catch((err) => console.error("Erreur chargement commandes:", err.response?.data || err));
+}).catch((err) => {
+  if (err.status == 401) {
+    window.location.href = "login.html";
+  }
+  console.error("Erreur chargement commandes:", err.response?.data || err);
+});
 
 function commandeLabel(c){
   const dateStr = c.date ? String(c.date).substring(0,10) : 'sans date';
