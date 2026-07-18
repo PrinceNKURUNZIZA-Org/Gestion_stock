@@ -143,13 +143,17 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/categories";
+let endpoint = "https://api-pds.inganza.bi/api/categories";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
   DATA.push(...resp.data)
   filtered = [...DATA];
   render()
+}).catch((err) => {
+  if(err.status == 401){
+    window.location.href = "login.html"
+  }
 })
 
 // ── COLUMNS ──────────────────────────────────────────────────────

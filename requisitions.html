@@ -151,7 +151,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/requisitions";
+let endpoint = "https://api-pds.inganza.bi/api/requisitions";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
@@ -164,12 +164,12 @@ axios.get(endpoint).then((resp) => {
 let STOCKS = [];
 let UTILISATEURS = [];
 
-axios.get("http://localhost:8080/api/stocks").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/stocks").then(resp => {
   STOCKS = resp.data;
   populateSelect('stock', STOCKS, 'id');
 });
 
-axios.get("http://localhost:8080/api/utilisateurs").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
   UTILISATEURS = resp.data;
   populateSelect('utilisateur', UTILISATEURS, 'nom');
 });

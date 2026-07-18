@@ -147,7 +147,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/commandes";
+let endpoint = "https://api-pds.inganza.bi/api/commandes";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
@@ -162,12 +162,12 @@ axios.get(endpoint).then((resp) => {
 let CLIENTS = [];
 let UTILISATEURS = [];
 
-axios.get("http://localhost:8080/api/clients").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/clients").then(resp => {
   CLIENTS = resp.data;
   populateSelect('client', CLIENTS, 'nom');
 }).catch((err) => console.error("Erreur chargement clients:", err.response?.data || err));
 
-axios.get("http://localhost:8080/api/utilisateurs").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/utilisateurs").then(resp => {
   UTILISATEURS = resp.data;
   populateSelect('utilisateur', UTILISATEURS, (u) => `${u.nom} ${u.prenom}`);
 }).catch((err) => console.error("Erreur chargement utilisateurs:", err.response?.data || err));
