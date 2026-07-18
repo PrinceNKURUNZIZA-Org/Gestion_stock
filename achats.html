@@ -36,11 +36,11 @@
   <a class="sb-link " href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
   <a class="sb-link " href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
   <div class="sb-footer">
-    <a class="sb-user" href="login.html">
+     <button class="sb-user" onclick="deconnecter()">
       <div class="sb-avatar">A</div>
       <div><div class="u-name">Admin Système</div><div class="u-role">Administrateur</div></div>
       <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
-    </a>
+    </button>
   </div>
 </nav>
 <div class="main">
@@ -161,11 +161,17 @@ let editId = null;
 let delId = null;
 let endpoint = "https://api-pds.inganza.bi/api/achats";
 let filtered = [...DATA];
+let token = localStorage.getItem('token');
+let headers = { 'Authorization': `Bearer ${token}` };
 
-axios.get(endpoint).then((resp) => {
+axios.get(endpoint, { headers }).then((resp) => {
   DATA.push(...resp.data)
   filtered = [...DATA];
   render()
+}).catch((err) => {
+  if(err.status == 401){
+    window.location.href = "login.html"
+  }
 })
 
 
@@ -384,7 +390,12 @@ function toast(msg,type='success'){
   t.innerHTML=`<i class="bi bi-${ic[type]}" style="color:${cl[type]};flex-shrink:0;"></i><span>${msg}</span>`;
   s.appendChild(t); setTimeout(()=>t.remove(),3500);
 }
-
+function deconnecter() {
+  if(confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+    localStorage.removeItem('token');
+    window.location.href = "login.html";
+  }
+}
 // ── INIT ──────────────────────────────────────────────────────────
 render();
 </script>
