@@ -146,7 +146,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/utilisateurs";
+let endpoint = "http://192.168.1.130:8080/api/utilisateurs";
 let filtered = [...DATA];
 
 axios.get(endpoint).then((resp) => {
@@ -308,8 +308,8 @@ function saveRow() {
   document.getElementById('formError').classList.remove('show');
 
   const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })
+    : axios.post(endpoint, data, { headers });
 
   request.then((resp) => {
     if (editId) {

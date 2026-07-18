@@ -115,7 +115,6 @@
       <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-control" id="quantite"/></div>
       <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-control" id="date" placeholder=" "/></div>
       <div class="form-group"><label class="form-label">Stock</label><select class="form-control" id="stock"></select></div>
-      <div class="form-group"><label class="form-label">Utilisateur</label><select class="form-control" id="utilisateur"></select></div>
       <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
     <div class="modal-footer">
@@ -151,7 +150,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/requisitions";
+let endpoint = "http://192.168.1.130:8080/api/requisitions";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -166,7 +165,7 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 let STOCKS = [];
-axios.get("https://api-pds.inganza.bi/api/stocks", { headers }).then(resp => {
+axios.get("http://192.168.1.130:8080/api/stocks", { headers }).then(resp => {
   STOCKS = resp.data;
   populateSelect('stock', STOCKS, 'id');
 }).catch((err) => {
@@ -323,8 +322,8 @@ function saveRow() {
   }
 
   const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })
+    : axios.post(endpoint, data, { headers });
 
   request.then((resp) => {
     if (editId) {

@@ -143,7 +143,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/paiements";
+let endpoint = "http://192.168.1.130:8080/api/paiements";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -160,7 +160,7 @@ axios.get(endpoint, { headers }).then((resp) => {
 
 let COMMANDES = [];
 
-axios.get("https://api-pds.inganza.bi/api/commandes").then(resp => {
+axios.get("http://192.168.1.130:8080/api/commandes").then(resp => {
   COMMANDES = resp.data;
   populateCommandeSelect();
 }).catch((err) => console.error("Erreur chargement commandes:", err.response?.data || err));
@@ -322,8 +322,8 @@ function saveRow() {
   document.getElementById('formError').classList.remove('show');
 
   const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })
+    : axios.post(endpoint, data, { headers });
 
   request.then((resp) => {
     if (editId) {

@@ -159,7 +159,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/achats";
+let endpoint = "http://192.168.1.130:8080/api/achats";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -178,7 +178,7 @@ axios.get(endpoint, { headers }).then((resp) => {
 let PRODUITS = [];
 let FOURNISSEURS = [];
 
-axios.get("https://api-pds.inganza.bi/api/produits", { headers }).then(resp => {
+axios.get("http://192.168.1.130:8080/api/produits", { headers }).then(resp => {
   PRODUITS = resp.data;
   populateSelect('produit', PRODUITS, 'nom');
 }).catch((err) => {
@@ -187,7 +187,7 @@ axios.get("https://api-pds.inganza.bi/api/produits", { headers }).then(resp => {
   }
 });
 
-axios.get("https://api-pds.inganza.bi/api/fournisseurs", { headers }).then(resp => {
+axios.get("http://192.168.1.130:8080/api/fournisseurs", { headers }).then(resp => {
   FOURNISSEURS = resp.data;
   populateSelect('fournisseur', FOURNISSEURS, 'nom');
 }).catch((err) => {
@@ -346,8 +346,8 @@ function saveRow() {
   document.getElementById('formError').classList.remove('show');
 
   const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })
+    : axios.post(endpoint, data, { headers });
 
   request.then((resp) => {
     if (editId) {

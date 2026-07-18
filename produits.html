@@ -116,12 +116,11 @@
     </div>
     <div class="modal-body">
 <div class="form-group"><label class="form-label">Désignation</label><input type="text" class="form-control" id="nom" placeholder="Nom du produit"/></div>
+<div class="form-group"><label class="form-label">Icone</label><input type="text" class="form-control" id="nom" placeholder="ex: 👕"/></div>
 <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-control" id="description" placeholder="Description du produit"/></div>
 <div class="form-group"><label class="form-label">Prix Unitaire</label><input type="number" class="form-control" id="prixUnitaire" placeholder="0.00"/></div>
-<div class="form-group"><label class="form-label">Quantites</label><input type="number" class="form-control" id="quantite" placeholder="0"/></div>
-<div class="form-group"><label class="form-label">Date expiration</label><input type="number" class="form-control" id="delais" /></div>
+<div class="form-group"><label class="form-label">Delais expiration</label><input type="number" placeholder="Nombre de jours avant expiration" class="form-control" id="delais" /></div>
 <div class="form-group"><label class="form-label">Categorie</label><select class="form-control" id="categorie"></select></div>
-<div class="form-group"><label class="form-label">Utilisateur</label><select class="form-control" id="utilisateur"></select></div>
 <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
     <div class="modal-footer">
@@ -157,7 +156,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "https://api-pds.inganza.bi/api/produits";
+let endpoint = "http://192.168.1.130:8080/api/produits";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -173,7 +172,7 @@ axios.get(endpoint, { headers }).then((resp) => {
 })
 
 let CATEGORIES = [];
-axios.get("https://api-pds.inganza.bi/api/categories", { headers }).then(resp => {
+axios.get("http://192.168.1.130:8080/api/categories", { headers }).then(resp => {
   CATEGORIES = resp.data;
   populateSelect('categorie', CATEGORIES, 'nom');
 }).catch((err) => {
@@ -315,10 +314,8 @@ function saveRow() {
     nom: document.getElementById("nom").value,
     description: document.getElementById("description").value,
     prixUnitaire: document.getElementById("prixUnitaire").value,
-    quantite: Number(document.getElementById("quantite").value),
     delais: Number(document.getElementById("delais").value),
     categorie: Number(document.getElementById("categorie").value),
-    utilisateur: Number(document.getElementById("utilisateur").value)
   };
 
   if (!data.nom.trim()) {
@@ -328,8 +325,8 @@ function saveRow() {
   }
 
   const request = editId
-    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data })
-    : axios.post(endpoint, data);
+    ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })
+    : axios.post(endpoint, data, { headers });
 
   request.then((resp) => {
     if (editId) {
@@ -343,8 +340,14 @@ function saveRow() {
     render();
     toast('Enregistré avec succès', 'success');
   }).catch((err) => {
-    console.error("Erreur:", err);
-    toast("Erreur lors de l'enregistrement", 'error');
+    try {
+      let errors = err.response.data.details;
+      for(let details of errors) {
+        toast(details, 'error');
+      }
+    } catch (error) {
+      toast("Erreur lors de l'enregistrement", 'error');
+    }
   });
 }
 
