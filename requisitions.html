@@ -165,13 +165,15 @@ axios.get(endpoint, { headers }).then((resp) => {
     window.location.href = "login.html"
   }
 })
-
 let STOCKS = [];
-axios.get("https://api-pds.inganza.bi/api/stocks").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/stocks", { headers }).then(resp => {
   STOCKS = resp.data;
   populateSelect('stock', STOCKS, 'id');
+}).catch((err) => {
+  if (err.status == 401) {
+    window.location.href = "login.html"
+  }
 });
-
 
 function populateSelect(fieldId, items, labelKey) {
   const el = document.getElementById(fieldId);
