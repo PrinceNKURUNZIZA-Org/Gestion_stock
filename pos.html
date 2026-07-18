@@ -278,22 +278,6 @@ body { overflow: hidden; }
 
       <!-- Payment -->
       <div class="pay-section">
-        <div class="pay-methods" id="payMethods">
-          <button class="pay-method selected" onclick="selPay(this,'Espèces')"><i class="bi bi-cash-coin"></i>Espèces</button>
-          <button class="pay-method" onclick="selPay(this,'Mobile Money')"><i class="bi bi-phone-fill"></i>Mobile Money</button>
-          <button class="pay-method" onclick="selPay(this,'Carte')"><i class="bi bi-credit-card"></i>Carte</button>
-          <button class="pay-method" onclick="selPay(this,'Virement')"><i class="bi bi-bank"></i>Virement</button>
-        </div>
-        <div class="quick-amts">
-          <button class="qa-btn" onclick="setAmt(5000)">5K</button>
-          <button class="qa-btn" onclick="setAmt(10000)">10K</button>
-          <button class="qa-btn" onclick="setAmt(20000)">20K</button>
-          <button class="qa-btn" onclick="setAmt(50000)">50K</button>
-          <button class="qa-btn" onclick="setAmt(100000)">100K</button>
-          <button class="qa-btn" onclick="setAmt(500000)">500K</button>
-          <button class="qa-btn" onclick="setAmt(1000000)">1M</button>
-          <button class="qa-btn" onclick="setExact()">Exact</button>
-        </div>
         <div class="pay-input-row">
           <input type="number" id="amountGiven" placeholder="Montant reçu..." oninput="calcMonnaie()"/>
           <div class="monnaie">
@@ -342,6 +326,9 @@ let lastSale = null;
 let endpointProduits = "http://192.168.1.130:8080/api/produits";
 let endpointCategories = "http://192.168.1.130:8080/api/categories";
 
+let token = localStorage.getItem('token');
+let headers = { 'Authorization': `Bearer ${token}` };
+
 // Icônes par nom de catégorie — ajoute une entrée si tu crées de nouvelles catégories
 const CAT_ICONS = {
   'Informatique': '🖥️', 'Fournitures': '📎', 'Électronique': '📱',
@@ -350,10 +337,10 @@ const CAT_ICONS = {
 const DEFAULT_ICON = '📦';
 
 // ── CHARGEMENT DES DONNÉES ────────────────────────────────────────
-axios.get(endpointCategories).then(resp => {
+axios.get(endpointCategories, { headers }).then(resp => {
   CATEGORIES = resp.data;
   buildCategoryTabs();
-  return axios.get(endpointProduits);
+  return axios.get(endpointProduits, { headers });
 }).then(resp => {
   PRODUCTS = resp.data.map(mapProduit);
   filteredProds = [...PRODUCTS];
@@ -373,7 +360,7 @@ function mapProduit(p){
     cat: catNom,
     price: Number(p.prixUnitaire) || 0,
     stock: Number(p.quantite) || 0,
-    icon: CAT_ICONS[catNom] || DEFAULT_ICON,
+    icon: p.icon || DEFAULT_ICON,
     tva: 18 // ajuste ici si un jour ton API renvoie un taux de TVA par produit
   };
 }

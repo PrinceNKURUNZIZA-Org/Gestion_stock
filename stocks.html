@@ -117,11 +117,9 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-<div class="form-group"><label class="form-label">Date Entree</label><input type="date" class="form-control" id="dateEntree" placeholder="Date d'entrée"/></div>
-<div class="form-group"><label class="form-label">Quantite Initiale</label><input type="number" class="form-control" id="quantiteInitiale" placeholder="Quantite"/></div>
+      <div class="form-group"><label class="form-label">Produit</label><select class="form-control" id="produit"></select></div>
 <div class="form-group"><label class="form-label">Quantite</label><input type="number" class="form-control" id="quantite" placeholder="0.00"/></div>
 <div class="form-group"><label class="form-label">Date Expiration</label><input type="date" class="form-control" id="dateExpiration" placeholder="Date d'expiration"/></div>
-<div class="form-group"><label class="form-label">Produit</label><select class="form-control" id="produit"></select></div>
 <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
       <div class="form-error" id="formError"><i class="bi bi-exclamation-circle-fill"></i><span id="formErrorMsg"></span></div>
     </div>
@@ -312,22 +310,13 @@ function viewRow(id) {
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 
 function saveRow() {
-  const dateEntreeVal = document.getElementById("dateEntree").value;
-
   let data = {
-    dateEntree: dateEntreeVal ? new Date(dateEntreeVal).toISOString() : null,
-    quantiteInitiale: Number(document.getElementById("quantiteInitiale").value),
+    quantiteInitiale: Number(document.getElementById("quantite").value),
     quantite: Number(document.getElementById("quantite").value),
     dateExpiration: document.getElementById("dateExpiration").value,
+    dateEntree: new Date(),
     produit: Number(document.getElementById("produit").value),
-    utilisateur: Number(document.getElementById("utilisateur").value),
   };
-
-  if (!data.dateEntree) {
-    document.getElementById('formErrorMsg').textContent = "Le champ Date d'entrée est requis.";
-    document.getElementById('formError').classList.add('show');
-    return;
-  }
 
   const request = editId
     ? axios.put(`${endpoint}/${editId}`, { id: editId, ...data }, { headers })

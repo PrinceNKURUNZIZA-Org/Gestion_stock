@@ -285,7 +285,7 @@ function saveRow() {
 
   if(editId) {
     // MODIFICATION → PUT /api/categories/{id}
-    axios.put(`${endpoint}/${editId}`, data).then((resp) => {
+    axios.put(`${endpoint}/${editId}`, data, { headers }).then((resp) => {
       console.log("Réponse API:", resp.data);
       const idx = DATA.findIndex(x=>x.id===editId);
       if(idx!==-1) DATA[idx] = { ...DATA[idx], ...data };
@@ -299,7 +299,7 @@ function saveRow() {
     });
   } else {
     // AJOUT → POST /api/categories
-    axios.post(endpoint, data).then((resp) => {
+    axios.post(endpoint, data, { headers }).then((resp) => {
       console.log("Réponse API:", resp.data);
       DATA.push(resp.data);
       filtered=[...DATA];

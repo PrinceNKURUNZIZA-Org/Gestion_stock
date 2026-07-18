@@ -225,7 +225,10 @@ function render() {
 }
 
 function renderCell(r,c) {
-  const v = r[c.key] ?? '';
+  let v = r[c.key] ?? '';
+  if (typeof v == 'object') {
+    v = v.nom
+  }
   if(c.badge) return `<td>${badgeHtml(v, c.badge)}</td>`;
   if(c.money) return `<td style="font-weight:600;color:var(--text);">${Number(v).toLocaleString('fr-FR')} BIF</td>`;
   if(c.main) return `<td class="td-main">${v}</td>`;
