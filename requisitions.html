@@ -166,7 +166,11 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 
-
+let STOCKS = [];
+axios.get("https://api-pds.inganza.bi/api/stocks").then(resp => {
+  STOCKS = resp.data;
+  populateSelect('stock', STOCKS, 'id');
+});
 
 
 function populateSelect(fieldId, items, labelKey) {
