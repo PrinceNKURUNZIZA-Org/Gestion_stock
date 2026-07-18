@@ -160,10 +160,15 @@ axios.get(endpoint, { headers }).then((resp) => {
 
 let COMMANDES = [];
 
-axios.get("https://api-pds.inganza.bi/api/commandes").then(resp => {
+axios.get("https://api-pds.inganza.bi/api/commandes", { headers }).then(resp => {
   COMMANDES = resp.data;
   populateCommandeSelect();
-}).catch((err) => console.error("Erreur chargement commandes:", err.response?.data || err));
+}).catch((err) => {
+  if (err.status == 401) {
+    window.location.href = "login.html";
+  }
+  console.error("Erreur chargement commandes:", err.response?.data || err);
+});
 
 function commandeLabel(c){
   const dateStr = c.date ? String(c.date).substring(0,10) : 'sans date';
