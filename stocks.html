@@ -173,7 +173,11 @@ axios.get(endpoint, { headers }).then((resp) => {
     window.location.href = "login.html"
   }
 })
-
+let PRODUITS = [];
+axios.get("https://api-pds.inganza.bi/api/produits").then(resp => {
+  PRODUITS = resp.data;
+  populateSelect('produit', PRODUITS, 'nom');
+});
 
 
 function populateSelect(fieldId, items, labelKey) {
