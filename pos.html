@@ -187,7 +187,7 @@ body { overflow: hidden; }
   <a class="sb-link" href="permissions.html"><i class="bi bi-key-fill"></i> Permissions</a>
   <a class="sb-link" href="entreprise.html"><i class="bi bi-building-gear"></i> Entreprise</a>
   <div class="sb-footer">
-    <a class="sb-user" href="login.html">
+    <a class="sb-user" href="index.html">
       <div class="sb-avatar">A</div>
       <div><div class="u-name">Admin Système</div><div class="u-role">Caissier</div></div>
       <i class="bi bi-box-arrow-right" style="margin-left:auto;color:var(--muted);font-size:.85rem;"></i>
@@ -323,8 +323,8 @@ let filteredProds = [];
 let currentCat = '';
 let selectedPayMethod = 'Espèces';
 let lastSale = null;
-let endpointProduits = "http://192.168.1.130:8080/api/produits";
-let endpointCategories = "http://192.168.1.130:8080/api/categories";
+let endpointProduits = "http://localhost:8080/api/produits";
+let endpointCategories = "http://localhost:8080/api/categories";
 
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };

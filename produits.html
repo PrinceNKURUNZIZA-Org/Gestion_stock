@@ -156,7 +156,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://192.168.1.130:8080/api/produits";
+let endpoint = "http://localhost:8080/api/produits";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -167,17 +167,17 @@ axios.get(endpoint, { headers }).then((resp) => {
   render()
 }).catch((err) => {
   if(err.status == 401){
-    window.location.href = "login.html"
+    window.location.href = "index.html"
   }
 })
 
 let CATEGORIES = [];
-axios.get("http://192.168.1.130:8080/api/categories", { headers }).then(resp => {
+axios.get("http://localhost:8080/api/categories", { headers }).then(resp => {
   CATEGORIES = resp.data;
   populateSelect('categorie', CATEGORIES, 'nom');
 }).catch((err) => {
   if (err.status == 401) {
-    window.location.href = "login.html"
+    window.location.href = "index.html"
   }
 });
 
@@ -389,7 +389,7 @@ function toast(msg,type='success'){
 function deconnecter() {
   if(confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
     localStorage.removeItem('token');
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   }
 }
 // ── INIT ──────────────────────────────────────────────────────────
