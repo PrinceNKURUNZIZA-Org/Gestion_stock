@@ -156,7 +156,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/produits";
+let endpoint = "https://api-pds.inganza.bi/api/produits";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -172,7 +172,7 @@ axios.get(endpoint, { headers }).then((resp) => {
 })
 
 let CATEGORIES = [];
-axios.get("http://localhost:8080/api/categories", { headers }).then(resp => {
+axios.get("https://api-pds.inganza.bi/api/categories", { headers }).then(resp => {
   CATEGORIES = resp.data;
   populateSelect('categorie', CATEGORIES, 'nom');
 }).catch((err) => {

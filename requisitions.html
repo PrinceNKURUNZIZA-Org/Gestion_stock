@@ -149,7 +149,7 @@ let currentPage = 1;
 let perPage = 10;
 let editId = null;
 let delId = null;
-let endpoint = "http://localhost:8080/api/requisitions";
+let endpoint = "https://api-pds.inganza.bi/api/requisitions";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
@@ -164,7 +164,7 @@ axios.get(endpoint, { headers }).then((resp) => {
   }
 })
 let STOCKS = [];
-axios.get("http://localhost:8080/api/stocks", { headers }).then(resp => {
+axios.get("https://api-pds.inganza.bi/api/stocks", { headers }).then(resp => {
   STOCKS = resp.data;
   populateSelect('stock', STOCKS, 'id');
 }).catch((err) => {
