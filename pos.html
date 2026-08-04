@@ -10,7 +10,7 @@
 <style>
 /* POS layout override */
 body { overflow: hidden; }
-.pos-wrap { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 64px); gap: 0; }
+.pos-wrap { display: grid; grid-template-columns: 1fr 380px; grid-template-rows: minmax(0,1fr); height: calc(100vh - 64px); overflow: hidden; gap: 0; }
 @media(max-width:900px){ .pos-wrap { grid-template-columns:1fr; } .pos-cart { display:none; } }
 
 /* ── LEFT: products ───────────────────── */
@@ -346,6 +346,7 @@ function getUserIdFromToken(t){
   } catch(e){ return null; }
 }
 let currentUserId = token ? getUserIdFromToken(token) : null;
+console.log("ID utilisateur extrait du token:", currentUserId);
 
 // Icônes par nom de catégorie — ajoute une entrée si tu crées de nouvelles catégories
 const CAT_ICONS = {
@@ -631,6 +632,9 @@ function processPayment(){
     });
   }).catch(err => {
     console.error("Erreur lors de l'encaissement:", err.response?.data || err);
+    if(err.response?.data?.fieldErrors){
+      console.error("Détail des champs en erreur:", JSON.stringify(err.response.data.fieldErrors, null, 2));
+    }
     if(err.response?.status === 401){ window.location.href = "index.html"; return; }
     posToast("Erreur lors de l'encaissement — vente annulée", 'error');
   }).finally(() => {
