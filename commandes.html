@@ -167,16 +167,22 @@ axios.get(endpoint, { headers }).then((resp) => {
 })
 
 // Charge les clients et utilisateurs pour afficher leurs noms au lieu des IDs, et peupler le select du formulaire
-Promise.all([
+Promise.allSettled([
   axios.get(endpointClients, { headers }),
   axios.get(endpointUtilisateurs, { headers })
-]).then(([cliResp, usrResp]) => {
-  CLIENTS = cliResp.data;
-  UTILISATEURS = usrResp.data;
-  populateSelect('client', CLIENTS, 'nom');
+]).then(([cliResult, usrResult]) => {
+  if(cliResult.status === 'fulfilled'){
+    CLIENTS = cliResult.value.data;
+    populateSelect('client', CLIENTS, 'nom');
+  } else {
+    console.error("Erreur chargement clients:", cliResult.reason?.response?.data || cliResult.reason);
+  }
+  if(usrResult.status === 'fulfilled'){
+    UTILISATEURS = usrResult.value.data;
+  } else {
+    console.error("Erreur chargement utilisateurs:", usrResult.reason?.response?.data || usrResult.reason);
+  }
   render(); // ré-affiche avec les noms maintenant disponibles
-}).catch((err) => {
-  console.error("Erreur chargement clients/utilisateurs:", err.response?.data || err);
 });
 
 
@@ -225,16 +231,10 @@ function render() {
 function renderCell(r,c) {
   let v = r[c.key] ?? '';
   if (c.lookup) {
-    if (v && typeof v === 'object') {
-      // La valeur est déjà l'objet complet renvoyé par l'API (ex: { id, nom })
-      v = typeof c.labelKey === 'function' ? c.labelKey(v) : (v[c.labelKey] ?? v.id ?? '');
-    } else {
-      const list = c.lookup();
-      const found = list.find(it => it.id === v || it.id === Number(v));
-      if (found) {
-        v = typeof c.labelKey === 'function' ? c.labelKey(found) : found[c.labelKey];
-      }
-    }
+    const rawId = (v && typeof v === 'object') ? v.id : v;
+    const list = c.lookup();
+    const found = list.find(it => it.id === rawId || it.id === Number(rawId));
+    v = found ? (typeof c.labelKey === 'function' ? c.labelKey(found) : found[c.labelKey]) : (rawId ?? '');
   }
   if (c.date && v) v = String(v).substring(0, 16).replace('T', ' ');
   if(c.badge) return `<td>${badgeHtml(v, c.badge)}</td>`;
@@ -321,8 +321,8 @@ function viewRow(id) {
   const r = DATA.find(x=>x.id===id);
   const cliId = (r.client && typeof r.client === 'object') ? r.client.id : r.client;
   const usrId = (r.utilisateur && typeof r.utilisateur === 'object') ? r.utilisateur.id : r.utilisateur;
-  const cli = (r.client && typeof r.client === 'object') ? r.client : CLIENTS.find(c => c.id === cliId);
-  const usr = (r.utilisateur && typeof r.utilisateur === 'object') ? r.utilisateur : UTILISATEURS.find(u => u.id === usrId);
+  const cli = CLIENTS.find(c => c.id === cliId || c.id === Number(cliId));
+  const usr = UTILISATEURS.find(u => u.id === usrId || u.id === Number(usrId));
   const txt = [
     r.date ? String(r.date).substring(0,16).replace('T',' ') : '',
     cli ? cli.nom : '',
@@ -376,7 +376,7 @@ function askDel(id){
   delId=id;
   const r=DATA.find(x=>x.id===id);
   const cliId = (r.client && typeof r.client === 'object') ? r.client.id : r.client;
-  const cli = (r.client && typeof r.client === 'object') ? r.client : CLIENTS.find(c => c.id === cliId);
+  const cli = CLIENTS.find(c => c.id === cliId || c.id === Number(cliId));
   document.getElementById('delName').textContent = `Commande #${r.id}` + (cli ? ` – ${cli.nom}` : '');
   document.getElementById('delModal').classList.add('open');
 }
