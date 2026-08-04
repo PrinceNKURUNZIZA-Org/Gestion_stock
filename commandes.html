@@ -148,9 +148,13 @@ let perPage = 10;
 let editId = null;
 let delId = null;
 let endpoint = "https://api-pds.inganza.bi/api/commandes";
+let endpointClients = "https://api-pds.inganza.bi/api/clients";
+let endpointUtilisateurs = "https://api-pds.inganza.bi/api/utilisateurs";
 let filtered = [...DATA];
 let token = localStorage.getItem('token');
 let headers = { 'Authorization': `Bearer ${token}` };
+let CLIENTS = [];
+let UTILISATEURS = [];
 
 axios.get(endpoint, { headers }).then((resp) => {
   DATA.push(...resp.data)
@@ -161,6 +165,19 @@ axios.get(endpoint, { headers }).then((resp) => {
     window.location.href = "index.html"
   }
 })
+
+// Charge les clients et utilisateurs pour afficher leurs noms au lieu des IDs, et peupler le select du formulaire
+Promise.all([
+  axios.get(endpointClients, { headers }),
+  axios.get(endpointUtilisateurs, { headers })
+]).then(([cliResp, usrResp]) => {
+  CLIENTS = cliResp.data;
+  UTILISATEURS = usrResp.data;
+  populateSelect('client', CLIENTS, 'nom');
+  render(); // ré-affiche avec les noms maintenant disponibles
+}).catch((err) => {
+  console.error("Erreur chargement clients/utilisateurs:", err.response?.data || err);
+});
 
 
 
@@ -208,10 +225,15 @@ function render() {
 function renderCell(r,c) {
   let v = r[c.key] ?? '';
   if (c.lookup) {
-    const list = c.lookup();
-    const found = list.find(it => it.id === v || it.id === Number(v));
-    if (found) {
-      v = typeof c.labelKey === 'function' ? c.labelKey(found) : found[c.labelKey];
+    if (v && typeof v === 'object') {
+      // La valeur est déjà l'objet complet renvoyé par l'API (ex: { id, nom })
+      v = typeof c.labelKey === 'function' ? c.labelKey(v) : (v[c.labelKey] ?? v.id ?? '');
+    } else {
+      const list = c.lookup();
+      const found = list.find(it => it.id === v || it.id === Number(v));
+      if (found) {
+        v = typeof c.labelKey === 'function' ? c.labelKey(found) : found[c.labelKey];
+      }
     }
   }
   if (c.date && v) v = String(v).substring(0, 16).replace('T', ' ');
@@ -270,13 +292,13 @@ function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checke
 // ── CRUD ──────────────────────────────────────────────────────────
 function openAdd() {
   editId = null;
-  
+
   document.getElementById('modalTitle').querySelector('i').className = 'bi bi-cart-plus-fill';
+  document.getElementById('modalTitleText').textContent = 'Nouvelle commande';
   document.getElementById('date').value = '';
   document.getElementById('total').value = '';
   document.getElementById('totalPaye').value = '';
   document.getElementById('client').value = '';
-  document.getElementById('utilisateur').value = '';
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
@@ -290,16 +312,17 @@ function editRow(id) {
   document.getElementById('date').value = r.date ? String(r.date).substring(0, 16) : '';
   document.getElementById('total').value = r.total ?? '';
   document.getElementById('totalPaye').value = r.totalPaye ?? '';
-  document.getElementById('client').value = r.client ?? '';
-  document.getElementById('utilisateur').value = r.utilisateur ?? '';
+  document.getElementById('client').value = (r.client && typeof r.client === 'object') ? r.client.id : (r.client ?? '');
   document.getElementById('formError').classList.remove('show');
   document.getElementById('modal').classList.add('open');
 }
 
 function viewRow(id) {
   const r = DATA.find(x=>x.id===id);
-  const cli = CLIENTS.find(c => c.id === r.client);
-  const usr = UTILISATEURS.find(u => u.id === r.utilisateur);
+  const cliId = (r.client && typeof r.client === 'object') ? r.client.id : r.client;
+  const usrId = (r.utilisateur && typeof r.utilisateur === 'object') ? r.utilisateur.id : r.utilisateur;
+  const cli = (r.client && typeof r.client === 'object') ? r.client : CLIENTS.find(c => c.id === cliId);
+  const usr = (r.utilisateur && typeof r.utilisateur === 'object') ? r.utilisateur : UTILISATEURS.find(u => u.id === usrId);
   const txt = [
     r.date ? String(r.date).substring(0,16).replace('T',' ') : '',
     cli ? cli.nom : '',
@@ -312,16 +335,16 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 
 function saveRow() {
   const dateVal = document.getElementById("date").value;
+  const clientVal = Number(document.getElementById("client").value);
 
   let data = {
     date: dateVal ? new Date(dateVal).toISOString() : null,
     total: document.getElementById("total").value,
     totalPaye: document.getElementById("totalPaye").value,
-    client: Number(document.getElementById("client").value),
-    utilisateur: Number(document.getElementById("utilisateur").value),
+    client: clientVal ? { id: clientVal } : null,
   };
 
-  if (!data.client) {
+  if (!clientVal) {
     document.getElementById('formErrorMsg').textContent = "Le champ Client est requis.";
     document.getElementById('formError').classList.add('show');
     return;
@@ -352,7 +375,8 @@ function saveRow() {
 function askDel(id){
   delId=id;
   const r=DATA.find(x=>x.id===id);
-  const cli = CLIENTS.find(c => c.id === r.client);
+  const cliId = (r.client && typeof r.client === 'object') ? r.client.id : r.client;
+  const cli = (r.client && typeof r.client === 'object') ? r.client : CLIENTS.find(c => c.id === cliId);
   document.getElementById('delName').textContent = `Commande #${r.id}` + (cli ? ` – ${cli.nom}` : '');
   document.getElementById('delModal').classList.add('open');
 }
