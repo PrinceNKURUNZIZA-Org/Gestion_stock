@@ -252,7 +252,7 @@ body { overflow: hidden; }
       <!-- Client -->
       <div class="client-select">
         <label><i class="bi bi-person" style="margin-right:.3rem;"></i>Client</label>
-        <select id="selClient">
+        <select id="selClient" onchange="updatePayBtn()">
           <option value="">— Client anonyme —</option>
         </select>
       </div>
@@ -550,7 +550,8 @@ function updatePayBtn(){
   const total = parseFmt(document.getElementById('totalTTC').textContent);
   const given = +document.getElementById('amountGiven').value || 0;
   const hasItems = Object.keys(cart).length > 0;
-  const canPay = hasItems && (selectedPayMethod !== 'Espèces' || given >= total);
+  const hasClient = !!document.getElementById('selClient').value;
+  const canPay = hasItems && hasClient && (selectedPayMethod !== 'Espèces' || given >= total);
   document.getElementById('btnPay').disabled = !canPay;
 }
 
@@ -582,6 +583,13 @@ function processPayment(){
   const clientSel = document.getElementById('selClient');
   const clientId = clientSel.value ? Number(clientSel.value) : null;
   const clientLabel = clientSel.options[clientSel.selectedIndex].text;
+
+  if(!clientId){
+    posToast("Veuillez sélectionner un client avant d'encaisser", 'error');
+    document.getElementById('btnPay').disabled = false;
+    return;
+  }
+
   const soldItems = Object.values(cart).map(({prod,qty})=>({name:prod.name,qty,price:prod.price,total:prod.price*qty}));
   const cartSnapshot = Object.entries(cart).map(([id,{prod,qty}]) => ({id:Number(id), prod, qty}));
 
