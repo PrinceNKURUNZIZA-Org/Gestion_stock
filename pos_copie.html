@@ -686,7 +686,12 @@ function posToast(msg, type='success'){
   s.appendChild(t);
   setTimeout(()=>t.remove(), 2500);
 }
-
+function deconnecter() {
+  if(confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
+    localStorage.removeItem('token');
+    window.location.href = "index.html";
+  }
+}
 // ── INIT ──────────────────────────────────────────────────────────
 renderCart(); // renderProds() se déclenche automatiquement une fois les données chargées
 </script>
