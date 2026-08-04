@@ -598,6 +598,7 @@ function processPayment(){
   // 1) Crée la commande côté serveur
   axios.post(endpointCommandes, commandePayload, { headers }).then(cmdResp => {
     const commande = cmdResp.data;
+    console.log("Commande créée, réponse API:", commande);
 
     // 2) Crée une "vente" par article du panier, liée à la commande — c'est ce qui décrémente le stock côté serveur
     const ventes = cartSnapshot.map(({id, prod, qty}) => {
@@ -610,7 +611,8 @@ function processPayment(){
       return axios.post(endpointVentes, ventePayload, { headers });
     });
 
-    return Promise.all(ventes).then(() => {
+    return Promise.all(ventes).then((venteResps) => {
+      console.log("Ventes créées, réponses API:", venteResps.map(r=>r.data));
       lastSale = {
         num: commande.id ? 'CMD-' + String(commande.id).padStart(5,'0') : 'CMD-?????',
         client: clientLabel, date: new Date().toLocaleString('fr-FR'),
