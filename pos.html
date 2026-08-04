@@ -69,9 +69,10 @@ body { overflow: hidden; }
 
 /* Cart items */
 .pos-cart { min-height:0; }
-.cart-items { flex:1; min-height:0; overflow-y:auto; padding:.6rem .8rem; }
-.cart-items::-webkit-scrollbar { width:4px; }
-.cart-items::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.cart-items { flex:1; min-height:0; overflow-y:auto; padding:.6rem .8rem; scrollbar-width:thin; scrollbar-color:var(--teal) transparent; }
+.cart-items::-webkit-scrollbar { width:7px; }
+.cart-items::-webkit-scrollbar-thumb { background:var(--teal); border-radius:4px; }
+.cart-items::-webkit-scrollbar-track { background:rgba(255,255,255,.03); }
 
 .cart-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--muted); gap:.75rem; }
 .cart-empty i { font-size:2.5rem; opacity:.3; }
@@ -589,8 +590,8 @@ function processPayment(){
     date: new Date().toISOString(),
     total: total,
     totalPaye: total,
-    client: clientId,
-    utilisateur: currentUserId
+    client: clientId ? { id: clientId } : null,
+    utilisateur: currentUserId ? { id: currentUserId } : null
   };
 
   // 1) Crée la commande côté serveur
@@ -602,8 +603,8 @@ function processPayment(){
       const ventePayload = {
         quantite: qty,
         total: (prod.price * qty).toFixed(2),
-        produit: id,
-        commande: commande.id
+        produit: { id: id },
+        commande: { id: commande.id }
       };
       return axios.post(endpointVentes, ventePayload, { headers });
     });
